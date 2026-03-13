@@ -6,7 +6,7 @@
 > for three PDE classes.  The goal is not to produce the most accurate solver for
 > each equation; it is to study whether GRW-based formulations are feasible,
 > how closely they reproduce known solutions, and where they fail and why.
-> Method fidelity is central.  Error metrics are feasibility
+> Error metrics are feasibility
 > diagnostics, not accuracy claims.
 
 ---
@@ -32,11 +32,11 @@ by numerically integrating the glob distribution.
 Three PDE classes are studied:
 
 - **Heat**: the natural setting for GRW.  The gradient formulation is exact and
-  the method has a direct derivation.
+  the method has a direct derivation from the heat equation.
 - **Burgers**: solved via the Cole-Hopf transformation, which reduces Burgers to a
   heat equation solvable by GRW.  A direct derivative-based GRW path is retained
   only as a diagnostic showing why that approach is impractical.
-- **FitzHugh-Nagumo**: a scalar traveling-wave GRW.
+- **FitzHugh-Nagumo**: a scalar traveling-wave GRW formulation.
   The reaction statistic is derived analytically from the exact traveling-wave
   solution and conserves total weight exactly.
 
@@ -131,7 +131,7 @@ Evolves globs representing v = u_x directly under the reaction-diffusion equatio
   v_t = nu * v_xx - u * v_x - v^2.
 The reaction statistic requires computing u_xx from the noisy particle field
 (two numerical differentiations), which amplifies shot noise severely.  This path
-is included to show that direct GRW for Burgers is
+is included to demonstrate that direct GRW for Burgers is
 impractical.  Large errors against an FD reference are expected and intentional.
 
 #### Lagrangian GRW (legacy, not a primary solver)
@@ -144,7 +144,7 @@ this branch.
 
 ### FitzHugh-Nagumo -- scalar traveling-wave GRW
 
-The FHN system is reduced to a scalar PDE  u_t = D * u_xx + f(u)  following the
+The FHN system is reduced to a scalar PDE  u_t = D * u_xx + f(u)  in the
 traveling-wave formulation.  Globs represent contributions to u_x; u is
 reconstructed by cumulative summation exactly as in the heat GRW.
 
