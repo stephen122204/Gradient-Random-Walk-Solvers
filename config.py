@@ -1,5 +1,14 @@
 import json
+import re
+
 import numpy as np
+
+
+def _strip_json_comments(text: str) -> str:
+    """Strip // line comments while preserving // inside quoted strings."""
+    def _replacer(m: re.Match) -> str:
+        return m.group(0) if m.group(0).startswith('"') else ""
+    return re.sub(r'"(?:[^"\\]|\\.)*"|//[^\n]*', _replacer, text)
 
 
 # ---------------------------
@@ -169,7 +178,11 @@ class SimulationConfig:
         burgers_mode=None,
         burgers_ic_type=None,
         burgers_ic_amplitude=None,
+        burgers_ic_x_center=None,
         fhn_ic_type=None,
+        heat_ic_type=None,
+        heat_jump_position=None,
+        heat_jump_height=None,
     ):
         self.equation_type = equation_type
         self.domain_type = domain_type
@@ -190,8 +203,14 @@ class SimulationConfig:
         self.burgers_ic_type = (burgers_ic_type or "").strip().lower()
         # For stationary_shock IC: the amplitude parameter A in -A*tanh(A*(x-xc)/(2*nu)).
         self.burgers_ic_amplitude = float(burgers_ic_amplitude) if burgers_ic_amplitude is not None else None
+        # Shock / wave center position (set by load_config_from_json for stationary_shock / traveling_wave).
+        self.burgers_ic_x_center = float(burgers_ic_x_center) if burgers_ic_x_center is not None else None
         # FHN IC type: "steady_solution" | "nonsmooth" | "discontinuous" | "" (legacy)
         self.fhn_ic_type = (fhn_ic_type or "").strip().lower()
+        # Heat IC type and step parameters (set by load_config_from_json for exact overlay).
+        self.heat_ic_type = (heat_ic_type or "").strip().lower()
+        self.heat_jump_position = float(heat_jump_position) if heat_jump_position is not None else None
+        self.heat_jump_height = float(heat_jump_height) if heat_jump_height is not None else 1.0
 
 
 # ---------------------------
@@ -469,7 +488,7 @@ def load_config_from_json(path: str) -> SimulationConfig:
     See config_template.jsonc for documentation of every supported field.
     """
     with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+        data = json.loads(_strip_json_comments(f.read()))
 
     validate_config_dict(data)
 
@@ -500,9 +519,15 @@ def load_config_from_json(path: str) -> SimulationConfig:
         heat_ic = data.get("heat_initial_condition", {"type": "step"})
         ic_type = str(heat_ic.get("type", "step")).lower()
 
+        heat_ic_type_stored = ic_type
+        heat_jump_pos_stored = None
+        heat_jump_height_stored = 1.0
+
         if ic_type == "step":
             jump_position = heat_ic.get("jump_position", None)
             jump_height = float(heat_ic.get("jump_height", 1.0))
+            heat_jump_pos_stored = float(jump_position) if jump_position is not None else domain_size / 2.0
+            heat_jump_height_stored = jump_height
             initial_conditions = generate_heat_step_initial_conditions(
                 domain_size,
                 num_points,
@@ -622,6 +647,7 @@ def load_config_from_json(path: str) -> SimulationConfig:
         elif condition_type == "traveling_wave":
             ic_nu = float(b_ic.get("nu", diff_constant))
             x_center = b_ic.get("x_center", None)
+            b_ic_x_center = float(x_center) if x_center is not None else domain_size / 2.0
             initial_conditions = generate_burgers_traveling_wave_ic(
                 domain_size, num_points,
                 nu=ic_nu,
@@ -631,6 +657,7 @@ def load_config_from_json(path: str) -> SimulationConfig:
             ic_nu = float(b_ic.get("nu", diff_constant))
             x_center = b_ic.get("x_center", None)
             burgers_shock_amplitude = float(b_ic.get("amplitude", 1.0))
+            b_ic_x_center = float(x_center) if x_center is not None else domain_size / 2.0
             initial_conditions = generate_burgers_stationary_shock_ic(
                 domain_size, num_points,
                 nu=ic_nu,
@@ -645,9 +672,10 @@ def load_config_from_json(path: str) -> SimulationConfig:
         raise ValueError(f"Invalid equation type in JSON: {equation_type!r}")
 
     burgers_mode = str(data.get("burgers_mode", "cole_hopf_grw")).strip().lower()
-    # burgers_ic_type_stored and burgers_shock_amplitude are set only for burgers ICs.
+    # burgers_ic_type_stored, burgers_shock_amplitude, and b_ic_x_center are set only for burgers ICs.
     b_ic_type_out = locals().get("burgers_ic_type_stored", "")
     b_ic_amplitude_out = locals().get("burgers_shock_amplitude", None)
+    b_ic_x_center_out = locals().get("b_ic_x_center", None)
 
     return SimulationConfig(
         equation_type, domain_type, domain_size, boundary_conditions,
@@ -656,7 +684,11 @@ def load_config_from_json(path: str) -> SimulationConfig:
         burgers_mode=burgers_mode,
         burgers_ic_type=b_ic_type_out,
         burgers_ic_amplitude=b_ic_amplitude_out,
+        burgers_ic_x_center=b_ic_x_center_out,
         fhn_ic_type=locals().get('fhn_ic_type_stored', ''),
+        heat_ic_type=locals().get('heat_ic_type_stored', ''),
+        heat_jump_position=locals().get('heat_jump_pos_stored', None),
+        heat_jump_height=locals().get('heat_jump_height_stored', 1.0),
     )
 
 

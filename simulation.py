@@ -135,7 +135,7 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
         5. React: w_i += dt * R(u_i) * w_i
            where R(u) = -(3D/2)*u^2 + (3D/2 - theta)*u + (theta/2 - D/4).
 
-    Initialization:
+    Initialization
       steady_solution IC: globs placed at inverted-logistic positions
         x_i = -2 * log(1/u_i - 1) + x_center, u_i = (i + 0.5) / N0
         with uniform weights w_i = 1 / N0.
@@ -192,6 +192,20 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
         _idx0 = int(np.clip(np.searchsorted(_uc0, 0.5), 0, n - 1))
         _x_center_init = float(np.sort(x)[_idx0])
 
+    # Always-on publication snapshot collection (4 evenly-spaced times: 0, T/3, 2T/3, T).
+    # Stored in config._fhn_snapshots for use by plot_results in utils.py.
+    _pub_snap_targets: dict[int, float] = {}
+    for _k in range(1, 4):
+        _t_tgt = _k * n_steps * dt / 3.0
+        _pub_s = min(int(round(_t_tgt / dt)) - 1, n_steps - 1)
+        _pub_snap_targets[_pub_s] = round(_t_tgt, 8)
+    _pub_snap_targets.setdefault(n_steps - 1, round(n_steps * dt, 8))
+
+    _pub_ord0 = np.argsort(x)
+    _pub_uc0 = np.cumsum(w[_pub_ord0])
+    _pub_x_center = float(x[_pub_ord0][int(np.clip(np.searchsorted(_pub_uc0, 0.5), 0, n - 1))])
+    _pub_snaps: dict[float, tuple] = {0.0: (x[_pub_ord0].copy(), w[_pub_ord0].copy())}
+
     for step in range(n_steps):
         # Step 1: Brownian walk.  Variance = 2 * D * dt.
         if sigma > 0.0:
@@ -236,6 +250,18 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
             _front_loc.append(float(x[idx_f]))
             if step in _snap_at:
                 _snaps[step] = (x.copy(), w.copy(), u_post.copy())
+
+        # Publication snapshot: x is already sorted after Step 3.
+        if step in _pub_snap_targets:
+            _pub_snaps[_pub_snap_targets[step]] = (x.copy(), w.copy())
+
+    # Store publication snapshots in config so plot_results can build the figure.
+    try:
+        config._fhn_snapshots = _pub_snaps
+        config._fhn_x_center = _pub_x_center
+        config._fhn_a = a_
+    except AttributeError:
+        pass
 
     for i in range(n):
         globs[i]['position'] = float(x[i])
