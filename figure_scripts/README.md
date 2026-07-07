@@ -1,39 +1,39 @@
 # Manuscript Figure Generator
 
-This folder contains the paper-style plotting pipeline copied from the local
-Desktop draft paper and adapted to run from this repository.
+Paper-style plotting pipeline for all eight manuscript figures.
 
-Run from the repository root:
+Run from the repository root (or use `python reproduce.py figures`):
 
 ```bash
-MPLCONFIGDIR=/tmp/grw-figure-mpl \
-XDG_CACHE_HOME=/tmp/grw-figure-cache \
-python3 figure_scripts/regenerate_manuscript_figures.py
+python figure_scripts/regenerate_manuscript_figures.py
 ```
 
-Default mode loads archived representative arrays from:
+Default mode loads the archived representative arrays from:
 
 ```text
 figure_data/representative_figure_arrays.npz
 ```
 
-and writes PDF/PNG figures to:
+and writes PDF/PNG figures to a timestamped folder:
 
 ```text
-_DRAFT__GRW_Methods (1)/figures/
+outputs/<YYYY-MM-DD_HH-MM-SS>/
 ```
 
-To rerun the representative simulations with fixed seed `42` and update the
-archive:
+To rerun the representative simulations with fixed seed `42` and replace the
+archive (verified bit-identical on the tested platform):
 
 ```bash
-MPLCONFIGDIR=/tmp/grw-figure-mpl \
-XDG_CACHE_HOME=/tmp/grw-figure-cache \
-python3 figure_scripts/regenerate_manuscript_figures.py --rerun
+python figure_scripts/regenerate_manuscript_figures.py --rerun
 ```
 
-The refinement/domain figures read CSV summaries from:
+The CSV-backed figures (heat fixed-grid diagnostic, FHN refinement, Burgers
+domain sensitivity) read the checked-in summaries from:
 
 ```text
-output/paper_refinement_original_grw/
+figure_data/*.csv
 ```
+
+Re-running `study_paper_refinement.py` writes fresh copies of the same
+summaries to `output/paper_refinement_original_grw/`; `reproduce.py verify`
+confirms the fresh copies are identical to the checked-in ones.

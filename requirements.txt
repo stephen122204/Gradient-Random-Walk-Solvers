@@ -1,0 +1,8 @@
+# Tested environment: Python 3.11.4 (macOS, Apple Silicon).
+# Versions pinned to the configuration under which all paper values were
+# verified bit-identical (reproduce.py verify --deep: 163/163 PASS).
+# The RNG stream (NumPy legacy RandomState/MT19937, seed 42) is stable across
+# NumPy versions by NumPy's compatibility policy, but floating-point details
+# of other operations are only guaranteed for the pinned versions below.
+numpy==2.4.2
+matplotlib==3.10.8

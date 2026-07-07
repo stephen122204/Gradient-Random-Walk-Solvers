@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper below."
+title: "GRW Solvers — companion code for 'A Numerical Study of Gradient Random Walk Methods for Heat, FitzHugh–Nagumo, and Burgers' Equations'"
+authors:
+  - family-names: Abkin
+    given-names: Stephen
+    affiliation: "Department of Mathematics, Texas A&M University"
+  - family-names: Daripa
+    given-names: Prabir
+    affiliation: "Department of Mathematics, Texas A&M University"
+repository-code: "https://github.com/stephen122204/heat_burgers_fhn"
+license: NOASSERTION  # TODO(license): update once a LICENSE file is chosen
+preferred-citation:
+  type: article
+  title: "A Numerical Study of Gradient Random Walk Methods for Heat, FitzHugh–Nagumo, and Burgers' Equations"
+  authors:
+    - family-names: Abkin
+      given-names: Stephen
+    - family-names: Daripa
+      given-names: Prabir
+  year: 2026
+  notes: "arXiv id to be assigned"
