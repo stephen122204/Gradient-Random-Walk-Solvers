@@ -1,0 +1,169 @@
+{
+  "_comment": "Expected values for reproduce.py verify. study_csvs holds the exact field strings of the checked-in figure_data CSVs (runtime_s is machine-specific and ignored). representative_metrics are the Table 2 norms, the Table 1 RMSE decomposition at L=4, and the Fig. 4 front locations, computed from figure_data/representative_figure_arrays.npz (seed 42).",
+  "study_csvs": {
+    "heat_refinement_summary.csv": [
+      {
+        "N": "1000",
+        "L2_h": "0.02240453412860915",
+        "Linf": "0.03168035040198461",
+        "rel_L2": "0.010203305437836879",
+        "total_weight": "1.0000000000000004",
+        "glob_std": "0.31801737281180514"
+      },
+      {
+        "N": "2000",
+        "L2_h": "0.02518337015741927",
+        "Linf": "0.03295869498227705",
+        "rel_L2": "0.011468822167658542",
+        "total_weight": "1.0000000000000004",
+        "glob_std": "0.31261750945366157"
+      },
+      {
+        "N": "5000",
+        "L2_h": "0.019049697819434695",
+        "Linf": "0.029416374097195663",
+        "rel_L2": "0.008675470966476802",
+        "total_weight": "1.0000000000000002",
+        "glob_std": "0.3182077721452076"
+      },
+      {
+        "N": "10000",
+        "L2_h": "0.017188332033991543",
+        "Linf": "0.024683530581397717",
+        "rel_L2": "0.007827781675934316",
+        "total_weight": "1.0000000000000002",
+        "glob_std": "0.31535969403530834"
+      },
+      {
+        "N": "20000",
+        "L2_h": "0.016739134096091474",
+        "Linf": "0.02337369589788818",
+        "rel_L2": "0.0076232113092339305",
+        "total_weight": "1.0000000000000002",
+        "glob_std": "0.31736167276099014"
+      },
+      {
+        "N": "50000",
+        "L2_h": "0.01579881390362825",
+        "Linf": "0.0206835305817481",
+        "rel_L2": "0.0071949777169622465",
+        "total_weight": "1.0",
+        "glob_std": "0.31628759442764104"
+      }
+    ],
+    "fhn_refinement_summary.csv": [
+      {
+        "N": "100",
+        "profile_L2": "0.13405494341674554",
+        "profile_rel_L2": "0.03329339944251987",
+        "profile_Linf": "0.0873515078257403",
+        "front_location_num": "12.048075939997403",
+        "front_location_exact": "11.818019484660535",
+        "front_error": "0.23005645533686803",
+        "total_weight": "0.9948661199557836"
+      },
+      {
+        "N": "200",
+        "profile_L2": "0.1446579377121123",
+        "profile_rel_L2": "0.03592672064176114",
+        "profile_Linf": "0.10925142259592652",
+        "front_location_num": "11.90783655084697",
+        "front_location_exact": "11.818019484660535",
+        "front_error": "0.08981706618643415",
+        "total_weight": "0.9974324429141521"
+      },
+      {
+        "N": "500",
+        "profile_L2": "0.049429291031119996",
+        "profile_rel_L2": "0.012276079408303815",
+        "profile_Linf": "0.030793747846871944",
+        "front_location_num": "11.993423717478828",
+        "front_location_exact": "11.818019484660535",
+        "front_error": "0.17540423281829298",
+        "total_weight": "0.9989782697169132"
+      },
+      {
+        "N": "1000",
+        "profile_L2": "0.041409954033268054",
+        "profile_rel_L2": "0.01028442596286801",
+        "profile_Linf": "0.026025255245768097",
+        "front_location_num": "11.631562659961718",
+        "front_location_exact": "11.818019484660535",
+        "front_error": "0.1864568246988174",
+        "total_weight": "0.9994858119996772"
+      },
+      {
+        "N": "2000",
+        "profile_L2": "0.03395388300641739",
+        "profile_rel_L2": "0.008432663210658088",
+        "profile_Linf": "0.024608854705436167",
+        "front_location_num": "11.832340953606478",
+        "front_location_exact": "11.818019484660535",
+        "front_error": "0.014321468945942328",
+        "total_weight": "0.999745061228632"
+      }
+    ],
+    "burgers_domain_sensitivity_summary.csv": [
+      {
+        "L": "4.0",
+        "N": "400",
+        "shock_width": "1.0",
+        "L_over_shock_width": "4.0",
+        "total_RMSE": "0.17650278236250638",
+        "bc_mismatch_RMSE": "0.17193713863813836",
+        "grw_particle_RMSE": "0.08132750169551946",
+        "L2_h": "0.35344765076515033",
+        "rel_L2": "0.24499742690186416"
+      },
+      {
+        "L": "6.0",
+        "N": "600",
+        "shock_width": "1.0",
+        "L_over_shock_width": "6.0",
+        "total_RMSE": "0.17555778841773967",
+        "bc_mismatch_RMSE": "0.13841281171446737",
+        "grw_particle_RMSE": "0.094285032716084",
+        "L2_h": "0.4303858063977965",
+        "rel_L2": "0.21466203789102667"
+      },
+      {
+        "L": "8.0",
+        "N": "800",
+        "shock_width": "1.0",
+        "L_over_shock_width": "8.0",
+        "total_RMSE": "0.20776655225701646",
+        "bc_mismatch_RMSE": "0.11963296412404384",
+        "grw_particle_RMSE": "0.14912367110914987",
+        "L2_h": "0.5880201795504885",
+        "rel_L2": "0.23983168842539604"
+      },
+      {
+        "L": "10.0",
+        "N": "1000",
+        "shock_width": "1.0",
+        "L_over_shock_width": "10.0",
+        "total_RMSE": "0.24463881951452066",
+        "bc_mismatch_RMSE": "0.10698418951515849",
+        "grw_particle_RMSE": "0.2206610257106084",
+        "L2_h": "0.7740029720455326",
+        "rel_L2": "0.2734772632799749"
+      }
+    ]
+  },
+  "representative_metrics": {
+    "heat.L2h": 0.011940769001878848,
+    "heat.Linf": 0.01615755256165019,
+    "heat.rel_L2": 0.005437975750330314,
+    "fhn_t9.L2h": 0.04947946606969819,
+    "fhn_t9.Linf": 0.030793747846871944,
+    "fhn_t9.rel_L2": 0.012288540698867598,
+    "burgers.L2h": 0.35344765076515033,
+    "burgers.Linf": 0.38478576431554345,
+    "burgers.rel_L2": 0.24499742690186416,
+    "burgers.E_det": 0.17193713863813836,
+    "burgers.E_grw": 0.08132750169551946,
+    "burgers.E_total": 0.17650278236250638,
+    "fhn_front.grw_T9": 12.013503093415249,
+    "fhn_front.anchored_ref_T9": 11.810019473993844
+  }
+}
