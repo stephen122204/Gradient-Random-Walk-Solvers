@@ -18,7 +18,7 @@ git checkout grw-solvers-v1
 ## Reproducing Numerical Results
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
+python -m venv .venv && source .venv/bin/activate   # tested with Python 3.11
 pip install -r requirements.txt
 ```
 
