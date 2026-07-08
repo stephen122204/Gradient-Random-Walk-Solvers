@@ -35,8 +35,31 @@ arrays in `figure_data/`; Figures 2, 5, 8 and Table 1 come from the
 refinement and domain studies (`reproduce.py studies`). The paper's pinned
 configurations live in `study_paper_refinement.py` and
 `figure_scripts/regenerate_manuscript_figures.py`, which `reproduce.py`
-invokes; `main.py` with the JSON files under `configs/` is for exploratory
-runs only.
+invokes.
+
+## Running Your Own Experiments
+
+The section above is for convenience in reproducing the paper. To run the
+solvers with your own inputs, copy a JSON config from `configs/`, edit it,
+and run:
+
+```bash
+python main.py configs/heat_step_dirichlet.json       # heat GRW
+python main.py configs/fhn_grw_steady.json            # scalar FHN GRW
+python main.py configs/burgers_stationary_shock.json  # Cole--Hopf Burgers
+```
+
+The main fields are `diff_constant` (α, D, or ν), `time_step`, `total_time`,
+`num_points` (particle count), `domain_size`, and `boundary_conditions`
+(Dirichlet reflects particles and keeps their weight; Neumann reflects and
+negates it). Each equation adds an initial-condition block: heat takes a
+step, uniform-gradient, or Gaussian-cloud profile; FHN takes the logistic
+front (`steady_solution`), a linear ramp, or a Heaviside step; Burgers takes
+a stationary shock, traveling wave, or step, solved through the Cole--Hopf
+transformation. `config_template.jsonc` documents every field with comments;
+comparison figures are saved under `outputs/<timestamp>/`. To check a custom
+run against an exact solution where one exists, use
+`python verify_solver.py --equation heat --config <your_config>.json`.
 
 ## Citation
 
