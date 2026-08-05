@@ -568,9 +568,11 @@ def simulate_burgers_cole_hopf_grw(globs, config, _diag_dir=None):
 
     Evolution:
       Brownian random walk followed by Dirichlet (weight-preserving, position-
-      mirroring) boundary reflection. Dirichlet reflection implements Neumann
-      BC for the phi_x density (zero flux at walls), meaning phi_x = 0 at walls
-      on average. The domain should be large relative to the diffusion length
+      mirroring) boundary reflection. Weight-preserving reflection gives zero
+      flux for the phi_x density at the walls, i.e. phi_xx = 0 there; through
+      the heat equation phi_t = nu*phi_xx this holds the endpoint values of
+      phi fixed (constant Dirichlet endpoints, as in _reference_phi_heat_fd).
+      The domain should be large relative to the diffusion length
       sqrt(2*nu*T) to minimize wall artifacts on the interior solution.
 
     Reconstruction at final time T:
@@ -580,8 +582,9 @@ def simulate_burgers_cole_hopf_grw(globs, config, _diag_dir=None):
          truncation at x=0 and x=L does not bias the phi_x amplitude near the
          boundaries (previously the standard mode='same' convolution
          underestimated |phi_x| there by up to ~2x for sigma_bins=12).
-         sigma_bins=12 spans ~30 output bins, reducing shot noise by ~sqrt(30)
-         while remaining narrow relative to the phi variation scale.
+         sigma_bins=12 averages a variance-effective ~43 bins (1/sum(k^2)),
+         reducing shot noise by a factor of ~6.5 while remaining narrow
+         relative to the phi variation scale.
       3. Enforce the correct total for the smoothed bins:
            - Symmetric IC (phi0(L)=phi0(0), exact_integral=0):
              subtract the mean of bin_sums_s to enforce zero total exactly.
@@ -659,9 +662,9 @@ def simulate_burgers_cole_hopf_grw(globs, config, _diag_dir=None):
     #
     # When a glob crosses a domain boundary its position is mirrored back into
     # [0, L] and its weight is unchanged.  This implements zero-flux for the
-    # phi_x density at the walls (equivalent to Neumann BC for phi, phi_x=0
-    # there).  On a domain large relative to sqrt(2*nu*T) the wall influence
-    # is negligible in the interior.
+    # phi_x density at the walls (phi_xx = 0 there, which keeps the endpoint
+    # values of phi fixed).  On a domain large relative to sqrt(2*nu*T) the
+    # wall influence is negligible in the interior.
     x_ph = x_mid.copy()
     w_ph = w_diff.copy()
     sigma_step = np.sqrt(2.0 * nu * dt)

@@ -28,7 +28,7 @@ def _make_run_dir() -> str:
 
 
 # --------------------------------------------------------------------------- #
-# Publication-quality plot style (matches the manuscript figures)
+# Publication-quality plot style (matches the paper figures)
 # --------------------------------------------------------------------------- #
 _EXACT = "#111111"
 _GRW = "#2166ac"

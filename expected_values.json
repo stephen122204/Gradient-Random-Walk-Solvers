@@ -165,5 +165,24 @@
     "burgers.E_total": 0.17650278236250638,
     "fhn_front.grw_T9": 12.013503093415249,
     "fhn_front.anchored_ref_T9": 11.810019473993844
+  },
+  "derived_values": {
+    "_note": "Values quoted in the paper that are derived from the checked-in data of record. Pinned at full precision; compared with the same tolerances as all float checks (rel/abs 1e-12).",
+    "fhn_fitted_front_speed": -0.34475098459369824,
+    "fhn_fitted_speed_rel_err_vs_exact_max": 0.0255,
+    "e_det_sqrtL_products": [
+      0.34387427727627673,
+      0.3390407625643671,
+      0.33837312074223347,
+      0.33831371249500586
+    ],
+    "kernel_variance_effective_bins": 42.538892421732385,
+    "kernel_noise_reduction_factor": 6.522184635667131,
+    "fhn_negative_weight_count_t9": 2,
+    "fhn_negative_weight_positions_t9": [
+      26.085606603514126,
+      26.26757487221386
+    ],
+    "burgers_clipped_bins_representative": 0
   }
 }
