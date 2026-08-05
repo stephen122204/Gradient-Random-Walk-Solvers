@@ -348,8 +348,7 @@ def plot_fhn_diagnostics(arrays: dict[str, np.ndarray], generated: list[str]) ->
     axes[0, 1].set_ylabel(r"$x_f^{\mathrm{GRW}}-x_f^{\mathrm{ref}}$")
 
     # Use a shared discrete color sequence so the same time value gets the
-    # same color in both the weight panel (bottom-left) and reconstruction
-    # panel (bottom-right).
+    # same color in both the weight panel (c) and reconstruction panel (d).
     snap_colors = ["#1b7837", "#762a83", "#e66101", "#2166ac"]
     snap_times = list(arrays["fhn_times"])
 
