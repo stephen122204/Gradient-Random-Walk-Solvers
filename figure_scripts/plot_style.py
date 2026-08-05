@@ -1,4 +1,4 @@
-"""Shared matplotlib style for the GRW manuscript figures."""
+"""Shared matplotlib style for the GRW paper figures."""
 
 from pathlib import Path
 
