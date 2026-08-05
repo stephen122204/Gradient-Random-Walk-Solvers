@@ -336,14 +336,14 @@ def plot_fhn_diagnostics(arrays: dict[str, np.ndarray], generated: list[str]) ->
 
     axes[0, 0].plot(time, reference, color=EXACT, label="Anchored reference")
     axes[0, 0].plot(time, location, color=GRW, linewidth=1.1, label="GRW crossing")
-    axes[0, 0].set_title("Front location")
+    axes[0, 0].set_title("(a) Front location")
     axes[0, 0].set_xlabel(r"$t$")
     axes[0, 0].set_ylabel(r"$x_f(t)$")
     axes[0, 0].legend(loc="best", fontsize=8)
 
     axes[0, 1].plot(time, location - reference, color=SECONDARY, linewidth=1.1)
     axes[0, 1].axhline(0.0, color=EXACT, linestyle=":", linewidth=1.0)
-    axes[0, 1].set_title("Front-location error")
+    axes[0, 1].set_title("(b) Front-location error")
     axes[0, 1].set_xlabel(r"$t$")
     axes[0, 1].set_ylabel(r"$x_f^{\mathrm{GRW}}-x_f^{\mathrm{ref}}$")
 
@@ -380,13 +380,13 @@ def plot_fhn_diagnostics(arrays: dict[str, np.ndarray], generated: list[str]) ->
     axes[1, 0].axhline(0.0, color=EXACT, linestyle=":", linewidth=1.0)
     weight_min = min(float(arrays[f"fhn_weights_t{str(int(t))}"].min()) for t in snap_times)
     axes[1, 0].set_ylim(bottom=min(weight_min * 3.0, -0.0004))
-    axes[1, 0].set_title("Gradient weights at snapshot times")
+    axes[1, 0].set_title("(c) Gradient weights at snapshot times")
     axes[1, 0].set_xlabel(r"$x$")
     axes[1, 0].set_ylabel(r"$w_i$")
     axes[1, 0].legend(loc="best", fontsize=7, markerscale=2.5)
 
     axes[1, 1].axhline(0.5, color=EXACT, linestyle=":", linewidth=1.0)
-    axes[1, 1].set_title("Cumulative reconstructions")
+    axes[1, 1].set_title("(d) Cumulative reconstructions")
     axes[1, 1].set_xlabel(r"$x$")
     axes[1, 1].set_ylabel(r"$u_N(x,t)$")
     axes[1, 1].legend(loc="lower right", fontsize=8)
