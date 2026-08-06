@@ -362,11 +362,14 @@ def _reference_phi_heat_fd(phi0_interp, x_out, nu, T, phi_left, phi_right):
     phi(0, t) = phi_left (= phi0(0), constant for all t)
     phi(L, t) = phi_right (= phi0(L), constant for all t)
 
-    These BCs match the GRW implicit treatment: weight-preserving reflection of
-    phi_x globs keeps the cumsum anchor phi(0,t) = phi0_0 and phi(L,t) = phi0_L
-    constant. This FD reference is therefore what the GRW converges to in the
-    zero-noise limit. The gap between this reference and the infinite-domain
-    exact solution quantifies the BC-mismatch (finite-domain truncation) error.
+    The FD solve and the GRW run use the same prescribed endpoint data
+    (phi0(0), phi0(L)) but enforce it differently: the FD solve holds both
+    endpoint values fixed at every step, whereas the GRW reconstruction uses
+    phi0(0) as the cumsum integration constant and enforces the phi0(L)-phi0(0)
+    difference through the corrected weight sum. This deterministic reference is
+    therefore not the exact zero-noise limit of the GRW run. The gap between it
+    and the infinite-domain exact solution is the deterministic component of the
+    error (finite-domain truncation plus discretization).
     """
     N = len(x_out)
     dx = float(x_out[1] - x_out[0])
@@ -397,14 +400,15 @@ def _save_cole_hopf_diagnostics(
     Three curves where available:
       exact_shape -- phi0(x) = cosh(...)/cosh(...); equals the infinite-domain
                       exact phi(x,T)/C(T). Shape is preserved on R.
-      FD reference -- phi(x,T) from a deterministic heat FD solve with the same
-                      Dirichlet BCs as the GRW (phi=phi0_0 at x=0,
-                      phi=phi0_L at x=L). Zero-noise limit of the GRW.
+      FD reference -- phi(x,T) from a deterministic heat FD solve using the same
+                      prescribed endpoint data as the GRW (phi=phi0_0 at x=0,
+                      phi=phi0_L at x=L), with both endpoints held fixed.
       GRW -- stochastic Monte-Carlo reconstruction.
 
     Error decomposition:
-      BC-mismatch = FD_ref - exact_shape (dominant: finite-domain effect)
-      GRW-noise = GRW - FD_ref (secondary: particle shot noise)
+      deterministic component = FD_ref - exact_shape (dominant: finite-domain effect)
+      GRW reconstruction component = GRW - FD_ref (binning, smoothing, endpoint
+          enforcement, and particle noise)
 
     Layout:
       [0,0] phi0(x): GRW init vs exact shape
@@ -412,7 +416,7 @@ def _save_cole_hopf_diagnostics(
       [0,2] phi_x/phi: GRW vs FD_ref vs exact
       [1,0] phi_x(T): gradient vs bins vs FD_ref vs exact
       [1,1] u(x,T): GRW vs FD_ref u vs exact
-      [1,2] Error decomposition: total / BC-mismatch / GRW-noise
+      [1,2] Error decomposition: total / deterministic / GRW reconstruction
     """
     import matplotlib.pyplot as plt
 
@@ -522,17 +526,17 @@ def _save_cole_hopf_diagnostics(
             rms_noise = float(np.sqrt(np.mean(err_noise**2)))
             ax.plot(x_out, err_bc, color=c_fd, linewidth=lw_fd,
                     linestyle="--",
-                    label=f"FD ref - exact  BC-mismatch rms={rms_bc:.3f}")
+                    label=f"FD ref - exact  deterministic component rms={rms_bc:.3f}")
             ax.plot(x_out, err_noise, color="mediumpurple", linewidth=1.1,
                     linestyle=":",
-                    label=f"GRW - FD ref  noise rms={rms_noise:.3f}")
+                    label=f"GRW - FD ref  GRW reconstruction rms={rms_noise:.3f}")
             print(f"  [Cole-Hopf] Error decomposition:")
             print(f"    Total   rms = {rms_total:.4f}")
-            print(f"    BC-mismatch = {rms_bc:.4f}  ({100*rms_bc/rms_total:.0f}% of total)")
-            print(f"    GRW noise = {rms_noise:.4f}  ({100*rms_noise/rms_total:.0f}% of total)")
+            print(f"    deterministic component = {rms_bc:.4f}  ({100*rms_bc/rms_total:.0f}% of total)")
+            print(f"    GRW reconstruction component = {rms_noise:.4f}  ({100*rms_noise/rms_total:.0f}% of total)")
     ax.axhline(0.0, color="black", linewidth=0.7, linestyle="--")
     ax.legend(fontsize=6)
-    ax.set_title("Error decomp: total / BC-mismatch / GRW-noise", fontsize=8)
+    ax.set_title("Error decomp: total / deterministic / GRW reconstruction", fontsize=8)
     ax.set_ylabel("error in u", fontsize=7)
 
     for ax in axes.flat:
@@ -759,7 +763,7 @@ def simulate_burgers_cole_hopf_grw(globs, config, _diag_dir=None):
     phi_x_out = np.gradient(phi_out, dx_out)   # Strategy A (used for u)
     phi_x_bins = bin_sums_s / dx_out             # Strategy B (shown in diagnostics)
 
-    # Safety floor for phi in case GRW noise pushes phi below phi0_min/2.
+    # Safety floor for phi in case particle noise pushes phi below phi0_min/2.
     phi0_min = float(phi0.min())
     phi_floor = max(phi0_min / 2.0, 1e-10)
     phi_clipped = phi_out < phi_floor
@@ -797,9 +801,10 @@ def simulate_burgers_cole_hopf_grw(globs, config, _diag_dir=None):
         u_ref_exact = None
 
     if _diag_dir is not None:
-        # Reference FD heat solve with the same Dirichlet BCs as the GRW.
-        # phi(0,t) = phi0_0 and phi(L,t) = phi0_L are constant: this is what
-        # weight-preserving reflection enforces in the cumsum reconstruction.
+        # Reference FD heat solve using the same prescribed endpoint data as
+        # the GRW, but enforced differently: the FD solve holds phi(0,t)=phi0_0
+        # and phi(L,t)=phi0_L fixed, whereas the GRW reconstruction fixes phi0_0
+        # as the cumsum constant and enforces the phi0_L-phi0_0 difference.
         phi0_on_xout = np.interp(x_out, x0, phi0)
         phi_ref_fd = _reference_phi_heat_fd(
             phi0_on_xout, x_out, nu, config.total_time, phi0_0, phi0_L,
