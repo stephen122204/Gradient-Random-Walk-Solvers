@@ -486,9 +486,9 @@ def study3_burgers_domain_sensitivity():
 
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.plot(L_vals, bc_errs,       'o-', color='darkorange', lw=2, ms=7,
-            label='BC-mismatch RMSE')
+            label='deterministic component RMSE')
     ax.plot(L_vals, particle_errs, 's-', color='steelblue',  lw=2, ms=7,
-            label='GRW particle RMSE')
+            label='GRW reconstruction component RMSE')
     ax.set_xlabel('Domain size L')
     ax.set_ylabel('RMSE contribution')
     ax.set_title('Cole-Hopf Burgers: error decomposition vs domain size')
@@ -584,9 +584,9 @@ def main():
         print(f"   [NOTE] FHN slope {slope2:.3f} deviates from -0.5.")
     bc_dom = all(r['bc_mismatch_RMSE'] > r['grw_particle_RMSE'] for r in rows3)
     if bc_dom:
-        print("    [PASS] BC-mismatch error dominates particle noise across all L values.")
+        print("    [PASS] deterministic component dominates the GRW reconstruction component across all L values.")
     else:
-        print("    [NOTE] Particle noise rivals BC-mismatch for some L values.")
+        print("    [NOTE] GRW reconstruction component rivals the deterministic component for some L values.")
 
 
 if __name__ == "__main__":
