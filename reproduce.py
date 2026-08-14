@@ -20,6 +20,14 @@ Targets
                                   # regenerate the archived arrays from fresh
                                   # seed-42 simulations before plotting
                                   # (overwrites figure_data/representative_figure_arrays.npz)
+    python reproduce.py ensembles # multi-seed ensemble, paired-grid, and
+                                  # Cole-Hopf control studies (t4 t7 t5 t3)
+    python reproduce.py t3|t4|t5|t7
+                                  # one ensemble study (see verify_ensembles.py)
+    python reproduce.py verify-ensembles
+                                  # re-run all four ensemble studies and compare
+                                  # every pinned numeric field against
+                                  # pinned_ensembles/ (PASS/FAIL)
 
 All paper configurations are pinned inside study_paper_refinement.py and
 figure_scripts/regenerate_paper_figures.py (seed 42 throughout). The JSON
@@ -272,10 +280,24 @@ def verify(deep: bool = False) -> int:
 
 def main() -> int:
     args = sys.argv[1:]
-    if not args or args[0] not in {"studies", "figures", "all", "verify"}:
+    known = {"studies", "figures", "all", "verify",
+             "ensembles", "verify-ensembles", "t3", "t4", "t5", "t7"}
+    if not args or args[0] not in known:
         print(__doc__)
         return 2
     target = args[0]
+    if target in {"t3", "t4", "t5", "t7"}:
+        import verify_ensembles
+        verify_ensembles.run_study(target)
+        return 0
+    if target == "ensembles":
+        import verify_ensembles
+        for name in verify_ensembles.STUDIES:
+            verify_ensembles.run_study(name)
+        return 0
+    if target == "verify-ensembles":
+        import verify_ensembles
+        return verify_ensembles.verify(rerun="--no-rerun" not in args)
     if target == "studies":
         elapsed = run_studies()
         print(f"\nstudies target complete in {elapsed:.1f}s "
