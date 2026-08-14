@@ -1,10 +1,14 @@
 # Gradient Random Walk Methods: Heat, FitzHugh–Nagumo, and Burgers
 
-This repository contains the code and data accompanying the paper *A Numerical
-Study of Gradient Random Walk Methods for Heat, FitzHugh–Nagumo, and Burgers'
-Equations* by Stephen Abkin and Prabir Daripa. A clean checkout of this branch
-independently verifies every number reported in the paper and regenerates all
-eight paper figures, using only files in the repository.
+This repository contains the code and data accompanying the paper *Numerical
+Accuracy and Error Sources in Gradient Random Walk Methods for the Heat,
+FitzHugh–Nagumo, and Viscous Burgers' Equations* (working title) by Stephen
+Abkin and Prabir Daripa. A clean checkout of this branch independently
+verifies every number reported in the paper and regenerates every paper
+figure, using only files in the repository: the representative single-seed
+studies and figures through the `studies`/`figures`/`verify` targets below,
+and the multi-seed ensemble, paired output-grid, and Cole–Hopf control
+studies through the `ensembles`/`verify-ensembles` targets.
 
 **Paper:** link to be added (arXiv preprint forthcoming).
 
@@ -20,10 +24,12 @@ pip install -r requirements.txt
 
 ## Verifying the Paper's Numbers
 
-Every computation in the paper uses a single fixed seed (42). The paper's
-design is deliberately single-seed: it reports no fitted convergence
-exponents, no confidence intervals, and no convergence theorems, and the
-verification below checks exactly the values the paper reports, nothing more.
+The representative calculations and the Burgers domain study use a single
+fixed seed (42), which makes each of them exactly repeatable; the ensemble
+studies of the next section use fixed thirty-seed lists. The verification
+below checks exactly the values the paper reports from the single-seed
+pipeline, nothing more; `verify-ensembles` does the same for the ensemble
+studies.
 
 ```bash
 python reproduce.py verify        # re-runs the studies, checks every reported value
@@ -39,6 +45,45 @@ regeneration is bit-for-bit identical; under other NumPy builds, last-digit
 noise up to about `2.4e-14` relative has been observed, which the tolerance
 absorbs. The summary line prints the actual check count (138 checks, or 175
 with `--deep`).
+
+## Multi-Seed Ensemble and Paired-Grid Studies
+
+The ensemble sections of the paper are produced by four self-contained study
+scripts under `studies/`, run and verified through the same entry point:
+
+```bash
+python reproduce.py ensembles         # run all four studies (t4, t7, t5, t3)
+python reproduce.py t4                # heat thirty-seed bias/spread/total study
+python reproduce.py t7                # paired heat output-grid study
+python reproduce.py t5                # scalar FHN thirty-seed convergence study
+python reproduce.py t3                # Cole-Hopf plateau: four controlled experiments
+python reproduce.py verify-ensembles  # re-run all four and compare every pinned
+                                      # numeric field against pinned_ensembles/
+```
+
+Study-to-paper mapping (combined draft):
+
+- **t4** (`output/final_prepublication_tests/heat_extended/`) — heat
+  bias–spread–total table and the ensemble decomposition figure
+  (spread exponent −0.468).
+- **t7** (`.../heat_grid_paired/`) — paired output-grid study: the same
+  thirty realizations per particle count reconstructed on the coupled `M=N`
+  grid and on fixed 300/400-bin grids. The coupled rows and fitted
+  slopes/CIs reproduce t4's published values digit-for-digit, which is the
+  built-in cross-check that the two studies share one solver and seed list.
+- **t5** (`.../fhn_extended/`) — scalar FHN profile/center/speed/aligned
+  convergence table, rates with realization-level bootstrap intervals, the
+  time-step sensitivity quartet, and the deterministic Neumann boundary
+  diagnostic (8.3e-4).
+- **t3** (`.../cole_hopf_plateau/`) — the four controlled experiments behind
+  the accuracy-floor diagnosis (domain sensitivity, deterministic-transform
+  control ~7e-4, perturbed-phi control, coupled particle/output-grid
+  refinement).
+
+`verify-ensembles` compares fresh runs against `pinned_ensembles/`
+(committed copies of the study outputs, down to individual realizations)
+with tolerances rel `1e-9` / abs `1e-12`; wall-clock fields and ~1e-16
+identity residuals are excluded. See `verify_ensembles.py`.
 
 ## Regenerating the Paper's Figures
 
