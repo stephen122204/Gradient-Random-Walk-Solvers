@@ -29,10 +29,11 @@ Targets
                                   # every pinned numeric field against
                                   # pinned_ensembles/ (PASS/FAIL)
 
-All paper configurations are pinned inside study_paper_refinement.py and
-figure_scripts/regenerate_paper_figures.py (seed 42 throughout). The JSON
-configs under configs/ and main.py are interactive exploration tools; they are
-not the source of the paper's numbers.
+All paper configurations are pinned inside study_paper_refinement.py,
+figure_scripts/regenerate_paper_figures.py (seed 42 throughout), and the
+studies/ scripts (fixed seed lists documented in each study). The JSON
+configs under configs/ and main.py are interactive exploration tools; they
+are not the source of the paper's numbers.
 
 Numerical tolerances
     Float comparisons use rel/abs tolerance 1e-12. Under the pinned
