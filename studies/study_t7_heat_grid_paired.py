@@ -403,10 +403,10 @@ def run_task7(N_seq=None, S=30, base_seed=42,
               'fixed400':  dict(color='tab:purple', marker='d', ls='-'),
               'fixed400e': dict(color='tab:pink',   marker='v', ls='--')}
     labels = {'coupled':   'coupled grid ($M=N$)',
-              'fixed300':  'fixed $M=300$, center-compare',
-              'fixed300e': 'fixed $M=300$, aligned',
-              'fixed400':  'fixed $M=400$, center-compare',
-              'fixed400e': 'fixed $M=400$, aligned'}
+              'fixed300':  'fixed $M=300$, bin center',
+              'fixed300e': 'fixed $M=300$, right edge',
+              'fixed400':  'fixed $M=400$, bin center',
+              'fixed400e': 'fixed $M=400$, right edge'}
     for arm in ('coupled', 'fixed300', 'fixed300e'):
         tot_a = np.array([r['E_total'] for r in results[arm]])
         axL.loglog(N_arr, tot_a, lw=1.6, ms=5, label=labels[arm], **styles[arm])
@@ -421,10 +421,10 @@ def run_task7(N_seq=None, S=30, base_seed=42,
         bias_a = np.array([r['E_bias'] for r in results[arm]])
         axR.loglog(N_arr, bias_a, lw=1.4, ms=4, label=labels[arm], **styles[arm])
     axR.axhline(control['M300']['center_compare'], color='tab:blue', ls=':', lw=1.1,
-                label='operator control, center')
+                label='deterministic, bin center')
     axR.axhline(control['M400']['center_compare'], color='tab:purple', ls=':', lw=1.1)
     axR.axhline(control['M300']['edge_compare'], color='k', ls=':', lw=1.1,
-                label='operator control, aligned')
+                label='deterministic, right edge')
     axR.set_xlabel(r'$N$'); axR.set_ylabel(r'$E_{\mathrm{bias}}$')
     axR.legend(fontsize=7); axR.grid(True, which='both', alpha=0.3)
     axR.text(0.02, 0.02, '(b)', transform=axR.transAxes, fontsize=11)

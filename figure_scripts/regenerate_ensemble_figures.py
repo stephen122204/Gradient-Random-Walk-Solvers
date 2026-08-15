@@ -127,10 +127,10 @@ def heat_grid_paired():
     }
     labels = {
         'coupled': 'coupled grid ($M=N$)',
-        'fixed300': 'fixed $M=300$, center-compare',
-        'fixed300e': 'fixed $M=300$, aligned',
-        'fixed400': 'fixed $M=400$, center-compare',
-        'fixed400e': 'fixed $M=400$, aligned',
+        'fixed300': 'fixed $M=300$, bin center',
+        'fixed300e': 'fixed $M=300$, right edge',
+        'fixed400': 'fixed $M=400$, bin center',
+        'fixed400e': 'fixed $M=400$, right edge',
     }
     fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.2))
     for arm in ('coupled', 'fixed300', 'fixed300e'):
@@ -149,11 +149,11 @@ def heat_grid_paired():
         y = np.array([float(r['E_bias']) for r in results[arm]])
         axR.loglog(N, y, lw=1.4, ms=4, label=labels[arm], **styles[arm])
     axR.axhline(float(control['M300']['center_compare']), color=GRW,
-                ls=':', lw=1.1, label='operator control, center')
+                ls=':', lw=1.1, label='deterministic, bin center')
     axR.axhline(float(control['M400']['center_compare']), color=SECONDARY,
                 ls=':', lw=1.1)
     axR.axhline(float(control['M300']['edge_compare']), color=EXACT,
-                ls=':', lw=1.1, label='operator control, aligned')
+                ls=':', lw=1.1, label='deterministic, right edge')
     axR.set_xlabel(r'$N$')
     axR.set_ylabel(r'$E_{\mathrm{bias}}$')
     axR.legend(fontsize=7)
