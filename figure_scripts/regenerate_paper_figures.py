@@ -15,9 +15,12 @@ from __future__ import annotations
 import csv
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+os.environ.setdefault("SOURCE_DATE_EPOCH", "1704067200")
 
 import matplotlib
 
@@ -611,7 +614,14 @@ def write_metadata(generated: list[str], force: bool, arrays: dict[str, np.ndarr
 
 
 def main() -> None:
+    global FIGURE_DIR
     force = "--rerun" in sys.argv
+    if "--output-dir" in sys.argv:
+        index = sys.argv.index("--output-dir")
+        try:
+            FIGURE_DIR = Path(sys.argv[index + 1]).resolve()
+        except IndexError as exc:
+            raise SystemExit("--output-dir requires a path") from exc
     apply_paper_style()
     arrays = generate_or_load_arrays(force=force)
     generated: list[str] = []

@@ -3,6 +3,46 @@ import os
 import numpy as np
 
 
+def _validated_step_count(total_time, time_step):
+    """Return the integer number of fixed steps, rejecting silent truncation."""
+    if time_step <= 0.0:
+        raise ValueError(f"time_step must be positive, got {time_step!r}")
+    if total_time < 0.0:
+        raise ValueError(f"total_time must be nonnegative, got {total_time!r}")
+    quotient = total_time / time_step
+    n_steps = int(round(quotient))
+    if not np.isclose(quotient, n_steps, rtol=1e-12, atol=1e-12):
+        raise ValueError(
+            "total_time must be an integer multiple of time_step for the "
+            f"fixed-step solvers (got total_time={total_time!r}, "
+            f"time_step={time_step!r})"
+        )
+    return n_steps
+
+
+def _reflect_arrays(positions, weights, domain_size, left_type, right_type):
+    """Reflect arrays into ``[0, domain_size]`` for arbitrarily large overshoots.
+
+    A Neumann reflection negates the corresponding gradient weight; a
+    Dirichlet reflection preserves it. Repeating until every position is in
+    the domain matters because Gaussian increments are unbounded.
+    """
+    if domain_size <= 0.0:
+        raise ValueError(f"domain_size must be positive, got {domain_size!r}")
+    while np.any((positions < 0.0) | (positions > domain_size)):
+        left = positions < 0.0
+        if np.any(left):
+            positions[left] = -positions[left]
+            if left_type == "neumann":
+                weights[left] = -weights[left]
+        right = positions > domain_size
+        if np.any(right):
+            positions[right] = 2.0 * domain_size - positions[right]
+            if right_type == "neumann":
+                weights[right] = -weights[right]
+    return positions, weights
+
+
 def random_walk(globs, diff_constant, time_step):
     """
     Vectorized Brownian displacement for all heat globs.
@@ -49,28 +89,20 @@ def apply_boundary_conditions(globs, boundary_conditions, domain_size):
     :param domain_size: float, right endpoint of the domain (left endpoint is 0)
     :return: updated list of globs
     """
-    for glob in globs:
-        # --- left boundary (x = 0) ---
-        if glob['position'] < 0:
-            bc_type = boundary_conditions['LEFT']['type'].lower()
-            if bc_type == 'dirichlet':
-                # symmetric reflection: overshoot = -position, reflect back to +|position|
-                glob['position'] = -glob['position']
-            elif bc_type == 'neumann':
-                # anti-symmetric: reflect position, negate value
-                glob['position'] = -glob['position']
-                glob['value'] = -glob['value']
-
-        # --- right boundary (x = domain_size) ---
-        elif glob['position'] > domain_size:
-            bc_type = boundary_conditions['RIGHT']['type'].lower()
-            if bc_type == 'dirichlet':
-                # symmetric reflection: overshoot = position - domain_size, reflect back
-                glob['position'] = 2 * domain_size - glob['position']
-            elif bc_type == 'neumann':
-                # anti-symmetric: reflect position, negate value
-                glob['position'] = 2 * domain_size - glob['position']
-                glob['value'] = -glob['value']
+    if not globs:
+        return globs
+    positions = np.array([g['position'] for g in globs], dtype=float)
+    weights = np.array([g['value'] for g in globs], dtype=float)
+    positions, weights = _reflect_arrays(
+        positions,
+        weights,
+        domain_size,
+        boundary_conditions['LEFT']['type'].lower(),
+        boundary_conditions['RIGHT']['type'].lower(),
+    )
+    for i, glob in enumerate(globs):
+        glob['position'] = float(positions[i])
+        glob['value'] = float(weights[i])
 
     return globs
 
@@ -93,7 +125,8 @@ def simulate_heat_equation(globs, config):
                    boundary_conditions, and domain_size
     :return: final list of globs after all time steps
     """
-    for _ in range(int(config.total_time / config.time_step)):
+    n_steps = _validated_step_count(config.total_time, config.time_step)
+    for _ in range(n_steps):
         globs = random_walk(globs, config.diff_constant, config.time_step)
         globs = apply_boundary_conditions(globs, config.boundary_conditions, config.domain_size)
     return globs
@@ -116,9 +149,10 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
       f(u) = u*(1-u) * [theta/2 - D*(1-2*u)/4]
       R(u) = f'(u) = -(3D/2)*u^2 + (3D/2 - theta)*u + (theta/2 - D/4)
 
-    Key property: integral_0^1 R(u) du = f(1) - f(0) = 0, so the total glob
-    weight is conserved by this reaction. No per-step renormalization is
-    needed or applied.
+    Key property: integral_0^1 R(u) du = f(1) - f(0) = 0. Thus the continuum
+    update has zero net contribution. The discrete right-sum approximation
+    need not conserve the total weight exactly, and no artificial per-step
+    renormalization is applied.
 
     GRW gradient-side algorithm (globs represent pieces of u_x):
       Each glob carries a position x_i and a signed weight w_i.
@@ -143,7 +177,7 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
       nonsmooth IC: linear-ramp inverse, w_i = 1/N0.
 
     :param globs: list of dicts with 'position' and scalar 'value' (= w_i)
-    :param config: SimulationConfig; diff_constant = D, a = threshold param,
+    :param config: SimulationConfig; diff_constant = D, a = wave-speed parameter,
                       time_step = dt, total_time = T, domain_size = L,
                       boundary_conditions used for position reflection.
     :param _diag_dir: optional path; if set, saves a diagnostic figure with
@@ -171,11 +205,12 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
     ], dtype=float)
 
     sigma = np.sqrt(2.0 * D * dt) if D > 0.0 else 0.0
-    n_steps = int(config.total_time / dt)
+    n_steps = _validated_step_count(config.total_time, dt)
 
     # Reaction coefficients: R(u) = c2*u^2 + c1*u + c0
     # Derived from f(u) = u*(1-u)*[theta/2 - D*(1-2u)/4].
-    # integral_0^1 R(u) du = 0 => total weight is conserved.
+    # integral_0^1 R(u) du = 0 in the continuum; the discrete right sum only
+    # approximates this balance, and no renormalization is imposed.
     c2 = -1.5 * D
     c1 =  1.5 * D - theta
     c0 =  0.5 * theta - 0.25 * D
@@ -215,17 +250,7 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
         #   Dirichlet: reflect position, preserve weight.
         #   Neumann: reflect position, negate weight.
         if L > 0.0:
-            for _ in range(4):
-                ml = x < 0.0
-                if np.any(ml):
-                    x[ml] = -x[ml]
-                    if bc_left == 'neumann':
-                        w[ml] = -w[ml]
-                mr = x > L
-                if np.any(mr):
-                    x[mr] = 2.0 * L - x[mr]
-                    if bc_right == 'neumann':
-                        w[mr] = -w[mr]
+            x, w = _reflect_arrays(x, w, L, bc_left, bc_right)
 
         # Step 3: Sort globs by position.
         order = np.argsort(x, kind='stable')
@@ -238,7 +263,8 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
 
         # Step 5: Multiplicative reaction update.
         # R(u) = -(3D/2)*u^2 + (3D/2-theta)*u + (theta/2-D/4)
-        # Total weight is conserved to O(dt^2); no renormalization is applied.
+        # The continuous zero-integral balance is approximated by this finite
+        # right sum; no renormalization is applied.
         R = c2 * u_cum**2 + c1 * u_cum + c0
         w += dt * R * w
 
@@ -672,12 +698,12 @@ def simulate_burgers_cole_hopf_grw(globs, config, _diag_dir=None):
     x_ph = x_mid.copy()
     w_ph = w_diff.copy()
     sigma_step = np.sqrt(2.0 * nu * dt)
-    n_steps = int(config.total_time / dt)
+    n_steps = _validated_step_count(config.total_time, dt)
     for _ in range(n_steps):
         x_ph += np.random.normal(0.0, sigma_step, size=x_ph.shape)
-        for _ in range(4):
-            ml = x_ph < 0.0;   x_ph[ml] = -x_ph[ml]
-            mr = x_ph > L;     x_ph[mr] = 2.0 * L - x_ph[mr]
+        x_ph, w_ph = _reflect_arrays(
+            x_ph, w_ph, L, "dirichlet", "dirichlet"
+        )
 
     # Reconstruct phi and u on a uniform N-point output grid.
     x_out = np.linspace(0.0, L, N)
@@ -693,8 +719,9 @@ def simulate_burgers_cole_hopf_grw(globs, config, _diag_dir=None):
           f"(should be ~{exact_integral:.6e})")
 
     # Gaussian smoothing to suppress GRW particle shot noise.
-    # sigma_bins=12 spans ~12*sqrt(2*pi)~30 output bins, reducing shot noise
-    # by ~sqrt(30) while staying well below the phi variation scale
+    # sigma_bins=12 has a variance-effective sample size
+    # 1/sum(kernel**2) ~ 43 bins, reducing shot noise by about sqrt(43)=6.5
+    # while staying below the phi variation scale
     # (shock width / dx_out >> 30 for well-resolved benchmarks).
     #
     # Boundary-corrected smoothing: mode='same' convolution zero-pads outside

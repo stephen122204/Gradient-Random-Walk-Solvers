@@ -1,8 +1,8 @@
 # Gradient Random Walk Methods for the Heat, FitzHugh-Nagumo, and Viscous Burgers Equations
 
-Code and data for the paper *Numerical Accuracy and Error Sources in Gradient
-Random Walk Methods for the Heat, FitzHugh-Nagumo, and Viscous Burgers'
-Equations* (working title) by Stephen Abkin and Prabir Daripa. A clean
+Code and data for the paper *Controlled Error Attribution for Gradient Random
+Walk Methods Applied to the Heat, FitzHugh-Nagumo, and Viscous Burgers'
+Equations* by Stephen Abkin and Prabir Daripa. A clean
 checkout of this branch reproduces and verifies every number and figure in
 the paper using only files in the repository.
 
@@ -17,7 +17,8 @@ pip install -r requirements.txt
 
 python reproduce.py verify             # single-seed pipeline, 138 checks
 python reproduce.py verify --deep      # adds fresh seed-42 array comparisons, 175 checks
-python reproduce.py verify-ensembles   # re-runs the four ensemble studies, 13 pinned file comparisons
+python reproduce.py verify-ensembles   # re-runs the five ensemble studies, 18 pinned file comparisons
+python -m unittest discover -s tests   # fast solver/control invariant checks
 ```
 
 `verify` re-runs the single-seed refinement and domain studies and compares
@@ -41,11 +42,12 @@ each script. Every study writes its tables, summaries, and figures under
 `output/final_prepublication_tests/`.
 
 ```bash
-python reproduce.py ensembles   # all four ensemble studies (t4, t7, t5, t3)
+python reproduce.py ensembles   # all five ensemble studies (t4, t7, t5, t3, t8)
 python reproduce.py t4          # heat thirty-seed study
-python reproduce.py t7          # paired heat output-grid study
+python reproduce.py t7          # paired heat output-grid study with the aligned correction
 python reproduce.py t5          # scalar FHN thirty-seed study
-python reproduce.py t3          # Cole-Hopf plateau controls
+python reproduce.py t3          # Cole-Hopf plateau evidence
+python reproduce.py t8          # Burgers controlled attribution (decoupled, boundary, response, domain)
 ```
 
 * **t4:** heat bias-spread-total decomposition and its ensemble figure
@@ -57,9 +59,17 @@ python reproduce.py t3          # Cole-Hopf plateau controls
 * **t5:** scalar FHN profile, center, speed, and aligned-profile convergence
   with realization-level bootstrap intervals, plus the time-step quartet and
   the deterministic Neumann boundary diagnostic.
-* **t3:** the four controlled experiments behind the Cole-Hopf accuracy-floor
-  diagnosis (domain sensitivity, deterministic-transform control, perturbed
-  transformed field, coupled particle and output-grid refinement).
+* **t3:** the four original Cole-Hopf plateau experiments (domain sensitivity,
+  deterministic-transform control, perturbed transformed field, coupled
+  particle and output-grid refinement), kept as raw evidence.
+* **t8:** the controlled attribution behind the paper's Burgers conclusions.
+  A validated parameterized pipeline (bit-identical to the packaged solver at
+  the paper configuration) decouples glob count, output grid, and smoothing
+  bandwidth over twenty-seed ensembles, adds the deterministic
+  boundary-consistent control (pinned versus exact transformed endpoint
+  data), the white and kernel-smoothed perturbation response curves, and the
+  thirty-seed domain decomposition. Its pinned data include every
+  realization-level scalar used in the reported intervals and trends.
 
 ## Figures
 
@@ -67,6 +77,7 @@ python reproduce.py t3          # Cole-Hopf plateau controls
 python reproduce.py figures     # the eight representative figures (PDF and PNG)
 python reproduce.py studies     # re-run the single-seed refinement and domain studies
 python reproduce.py all         # studies then figures
+python reproduce.py paper1-figures  # the ten figures used by the combined paper
 ```
 
 Two figure sources, matching the paper:
@@ -80,10 +91,12 @@ Two figure sources, matching the paper:
   re-runs those studies and `verify` confirms the results match the data of
   record.
 
-Ensemble figures are written by their own studies under
-`output/final_prepublication_tests/`. Each figure run writes
-`figure_regeneration_metadata.json` recording the seed and the source of
-every figure.
+`paper1-figures` is the canonical combined-paper figure target. It draws four
+representative figures from the archived seed-42 arrays and six
+ensemble/control figures from committed data in `pinned_ensembles/`, then
+writes a SHA-256 source manifest beside the ten figures under
+`output/final_prepublication_tests/paper_figures/`. It does not rely on an
+earlier study run or select a timestamped output directory.
 
 ## Run Your Own Cases
 
@@ -116,6 +129,7 @@ paper.
   and `config_template.jsonc` (own-case exploration, not paper inputs).
 * **Data of record:** `figure_data/`, `expected_values.json`, and
   `pinned_ensembles/`.
+* **Release checks:** `tests/` and `PROVENANCE.md`.
 
 ## Citation
 

@@ -1,7 +1,7 @@
 # Tested environment: Python 3.11.4 (macOS, Apple Silicon).
 # Versions pinned to the configuration under which all paper values were
 # verified (reproduce.py verify = 138 checks, verify --deep = 175 checks,
-# verify-ensembles = 13 pinned file comparisons, all PASS, bit-identical
+# verify-ensembles = 18 pinned file comparisons, all PASS, bit-identical
 # regeneration for the single-seed pipeline).
 # The RNG stream (NumPy legacy RandomState/MT19937, fixed seeds) is stable
 # across NumPy versions by NumPy's compatibility policy, but floating-point
