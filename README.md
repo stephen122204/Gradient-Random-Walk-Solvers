@@ -1,135 +1,104 @@
-# Gradient Random Walk Methods for the Heat, FitzHugh-Nagumo, and Viscous Burgers Equations
+# Gradient Random Walk Methods for the Heat, FitzHugh–Nagumo, and Viscous Burgers Equations
 
-Code and data for the paper *Controlled Error Attribution for Gradient Random
-Walk Methods Applied to the Heat, FitzHugh-Nagumo, and Viscous Burgers'
-Equations* by Stephen Abkin and Prabir Daripa. A clean
-checkout of this branch reproduces and verifies every number and figure in
-the paper using only files in the repository.
+Python software and reproducible numerical examples for the paper
+*Controlled Error Attribution for Gradient Random Walk Methods Applied to the
+Heat, FitzHugh–Nagumo, and Viscous Burgers Equations* by Stephen Abkin and
+Prabir Daripa.
 
-## Reproduce and Verify
+The repository supports two uses:
+
+1. reproduce the reported tables and figures; and
+2. modify the supplied configurations or study scripts to run new cases.
+
+## Install
 
 ```bash
 git clone https://github.com/stephen122204/heat_burgers_fhn.git
 cd heat_burgers_fhn
 git checkout grw-solvers-v1
-python -m venv .venv && source .venv/bin/activate   # tested with Python 3.11.4
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-
-python reproduce.py verify             # single-seed pipeline, 138 checks
-python reproduce.py verify --deep      # adds fresh seed-42 array comparisons, 175 checks
-python reproduce.py verify-ensembles   # re-runs the five ensemble studies, 18 pinned file comparisons
-python -m unittest discover -s tests   # fast solver/control invariant checks
 ```
 
-`verify` re-runs the single-seed refinement and domain studies and compares
-every reported value against `expected_values.json` with relative and
-absolute tolerance `1e-12`. That tolerance sits far above cross-platform
-floating-point noise and far below the precision of any reported value, so a
-genuine change in any paper value cannot pass. Under the pinned environment
-in `requirements.txt` the regeneration is bit-identical.
+The pinned environment uses Python 3.11.4. Generated files are written under
+`output/` or `outputs/`; both directories are ignored by Git.
 
-`verify-ensembles` re-runs the multi-seed studies and compares every pinned
-numeric field against `pinned_ensembles/`, which holds committed copies of
-the study outputs down to individual realizations. Wall-clock fields and
-order `1e-16` identity residuals are excluded. Tolerances are relative
-`1e-9` and absolute `1e-12`.
+## Reproduce the Paper
 
-## The Studies
-
-The single-seed studies (seed 42) live in `study_paper_refinement.py`. The
-ensemble studies live under `studies/` and use fixed seed lists documented in
-each script. Every study writes its tables, summaries, and figures under
-`output/final_prepublication_tests/`.
+Generate the ten figures used in the paper directly from the committed data:
 
 ```bash
-python reproduce.py ensembles   # all five ensemble studies (t4, t7, t5, t3, t8)
-python reproduce.py t4          # heat thirty-seed study
-python reproduce.py t7          # paired heat output-grid study with the aligned correction
-python reproduce.py t5          # scalar FHN thirty-seed study
-python reproduce.py t3          # Cole-Hopf plateau evidence
-python reproduce.py t8          # Burgers controlled attribution (decoupled, boundary, response, domain)
+python reproduce.py paper
 ```
 
-* **t4:** heat bias-spread-total decomposition and its ensemble figure
-  (spread exponent near the Monte Carlo reference).
-* **t7:** the paired output-grid study. The same thirty realizations per
-  particle count are reconstructed on the coupled grid and on fixed 300 and
-  400 bin grids. The coupled rows reproduce t4 digit for digit, the built-in
-  cross-check that the two studies share one solver and one seed list.
-* **t5:** scalar FHN profile, center, speed, and aligned-profile convergence
-  with realization-level bootstrap intervals, plus the time-step quartet and
-  the deterministic Neumann boundary diagnostic.
-* **t3:** the four original Cole-Hopf plateau experiments (domain sensitivity,
-  deterministic-transform control, perturbed transformed field, coupled
-  particle and output-grid refinement), kept as raw evidence.
-* **t8:** the controlled attribution behind the paper's Burgers conclusions.
-  A validated parameterized pipeline (bit-identical to the packaged solver at
-  the paper configuration) decouples glob count, output grid, and smoothing
-  bandwidth over twenty-seed ensembles, adds the deterministic
-  boundary-consistent control (pinned versus exact transformed endpoint
-  data), the white and kernel-smoothed perturbation response curves, and the
-  thirty-seed domain decomposition. Its pinned data include every
-  realization-level scalar used in the reported intervals and trends.
-
-## Figures
+Re-run the representative single-seed studies or all ensemble and controlled
+studies:
 
 ```bash
-python reproduce.py figures     # the eight representative figures (PDF and PNG)
-python reproduce.py studies     # re-run the single-seed refinement and domain studies
-python reproduce.py all         # studies then figures
-python reproduce.py paper1-figures  # the ten figures used by the combined paper
+python reproduce.py studies
+python reproduce.py ensembles
 ```
 
-Two figure sources, matching the paper:
-
-* **Archived representative arrays** (`figure_data/representative_figure_arrays.npz`,
-  seed 42) drive the comparison and diagnostic figures. `reproduce.py figures`
-  re-plots the archived data without re-running any simulation. Use
-  `--rerun-arrays` to re-simulate the arrays fresh.
-* **Checked-in study CSVs** (`figure_data/*.csv`, the data of record) drive
-  the refinement and domain-sensitivity figures. `reproduce.py studies`
-  re-runs those studies and `verify` confirms the results match the data of
-  record.
-
-`paper1-figures` is the canonical combined-paper figure target. It draws four
-representative figures from the archived seed-42 arrays and six
-ensemble/control figures from committed data in `pinned_ensembles/`, then
-writes a SHA-256 source manifest beside the ten figures under
-`output/final_prepublication_tests/paper_figures/`. It does not rely on an
-earlier study run or select a timestamped output directory.
-
-## Run Your Own Cases
-
-The sections above reproduce the paper. The solvers also run on
-user-supplied problems. Copy a JSON config from `configs/`, edit it, and run
-one of
+The individual ensemble targets are `t4` (heat), `t7` (paired heat-grid
+control), `t5` (FitzHugh–Nagumo), `t3` (original Cole–Hopf diagnostics), and
+`t8` (controlled Burgers attribution). For example:
 
 ```bash
-python main.py configs/heat_step_dirichlet.json       # heat GRW
-python main.py configs/fhn_grw_steady.json            # scalar FHN GRW
-python main.py configs/burgers_stationary_shock.json  # Cole-Hopf Burgers
-python run_config.py                                  # same, with a file picker
+python reproduce.py t8
 ```
 
-Every config field is documented with comments in `config_template.jsonc`.
-Comparison figures are saved under `outputs/<timestamp>/`. Where an exact
-solution exists, a custom run can be checked against it with
-`python verify_solver.py --equation heat --config <your_config>.json`. These
-tools are for exploration. They are not the source of any number in the
-paper.
+The committed reference values can be checked with:
+
+```bash
+python reproduce.py verify
+python reproduce.py verify-ensembles
+```
+
+Use `python reproduce.py verify --deep` to re-run the archived representative
+simulations as well as the tabulated studies. Run `python reproduce.py` with no
+target to display every available command.
+
+## Run a Modified Case
+
+Copy a JSON file from `configs/`, change its parameters, and pass it to the
+solver:
+
+```bash
+python main.py configs/heat_step_dirichlet.json
+python main.py configs/fhn_grw_steady.json
+python main.py configs/burgers_stationary_shock.json
+```
+
+`config_template.jsonc` documents the available fields. Custom comparison
+figures are saved below `outputs/`. When an exact solution is available, a
+modified case can also be checked with:
+
+```bash
+python verify_solver.py --equation heat --config configs/heat_step_dirichlet.json
+```
+
+The files in `studies/` are complete examples of parameter sweeps, multi-seed
+experiments, error decompositions, bootstrap intervals, and controlled
+comparisons. They can be copied and edited for new studies.
 
 ## Repository Layout
 
-* **Solvers and studies:** `simulation.py`, `config.py`, `verify_solver.py`
-  (exact solutions and error metrics), `study_paper_refinement.py`,
-  `studies/`.
-* **Entry points:** `reproduce.py` (all targets above) and
-  `verify_ensembles.py`.
-* **Interactive tools:** `main.py`, `run_config.py`, `utils.py`, `configs/`,
-  and `config_template.jsonc` (own-case exploration, not paper inputs).
-* **Data of record:** `figure_data/`, `expected_values.json`, and
-  `pinned_ensembles/`.
-* **Release checks:** `tests/` and `PROVENANCE.md`.
+- `simulation.py`, `config.py`: solver and configuration handling.
+- `configs/`, `config_template.jsonc`: editable example inputs.
+- `studies/`, `study_paper_refinement.py`: paper experiments and reusable study
+  examples.
+- `reproduce.py`: paper reproduction and verification entry point.
+- `figure_data/`, `pinned_ensembles/`, `expected_values.json`: committed data
+  behind the reported values and figures.
+- `figure_scripts/`: figure generation.
+- `tests/`: small smoke tests for core formulas and boundary operations.
+
+## Optional Smoke Test
+
+```bash
+python -m unittest discover -s tests
+```
 
 ## Citation
 

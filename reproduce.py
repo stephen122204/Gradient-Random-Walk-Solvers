@@ -28,8 +28,9 @@ Targets
                                   # re-run all five ensemble studies and compare
                                   # every pinned numeric field against
                                   # pinned_ensembles/ (PASS/FAIL)
+    python reproduce.py paper     # regenerate the ten combined-paper figures
     python reproduce.py paper1-figures
-                                  # regenerate every combined-paper figure into
+                                  # compatibility alias for ``paper``; writes to
                                   # output/final_prepublication_tests/paper_figures/
                                   # with a SHA-256 provenance manifest
 
@@ -286,7 +287,7 @@ def verify(deep: bool = False) -> int:
 def main() -> int:
     args = sys.argv[1:]
     known = {"studies", "figures", "all", "verify", "ensembles",
-             "verify-ensembles", "paper1-figures",
+             "verify-ensembles", "paper", "paper1-figures",
              "t3", "t4", "t5", "t7", "t8"}
     if not args or args[0] not in known:
         print(__doc__)
@@ -304,7 +305,7 @@ def main() -> int:
     if target == "verify-ensembles":
         import verify_ensembles
         return verify_ensembles.verify(rerun="--no-rerun" not in args)
-    if target == "paper1-figures":
+    if target in {"paper", "paper1-figures"}:
         import hashlib
         import shutil
         import tempfile
@@ -365,7 +366,7 @@ def main() -> int:
         with (paper_dir / "paper1_figure_manifest.json").open("w") as stream:
             json.dump(manifest, stream, indent=2)
         missing = [k for k, v in manifest.items() if v["sha256"] is None]
-        print(f"\npaper1-figures: {len(manifest) - len(missing)}/{len(manifest)} "
+        print(f"\npaper: {len(manifest) - len(missing)}/{len(manifest)} "
               f"canonical figures in {paper_dir.relative_to(ROOT)}/ "
               f"(manifest: paper1_figure_manifest.json)")
         return 1 if missing else 0
