@@ -361,32 +361,23 @@ def run_task3(S=10, base_seed=42):
     # From Study A: error at larger domains (domain mismatch contribution)
     domain_l2 = {r['L']: r['l2_mean'] for r in A_results if r['mode'] == 'fixed_N'}
 
-    if err_numgrad < 0.01:
-        diff_cause = "transform_differentiation_negligible"
-    elif err_numgrad > 0.2:
-        diff_cause = "transform_differentiation_dominant"
-    else:
-        diff_cause = "transform_differentiation_moderate"
-
-    domain_cause = "boundary_mismatch"
+    # Raw evidence only. No interpretive classification is computed here;
+    # attribution is established by the controlled studies (t8), not by a
+    # threshold rule inside this script.
+    domain_trend = None
     if domain_l2:
         L_vals = sorted(domain_l2.keys())
         if len(L_vals) >= 2:
-            trend = domain_l2[L_vals[-1]] - domain_l2[L_vals[0]]
-            if trend < -0.1:
-                domain_cause = "boundary_mismatch_significant"
-            elif abs(trend) < 0.05:
-                domain_cause = "boundary_mismatch_not_dominant"
+            domain_trend = domain_l2[L_vals[-1]] - domain_l2[L_vals[0]]
 
     decomposition = {
         'plateau_l2_observed': plateau_l2,
         'transform_differentiation': {
             'error_exact_phi_num_grad': err_numgrad,
-            'conclusion': diff_cause,
         },
         'boundary_mismatch': {
             'error_by_domain': domain_l2,
-            'conclusion': domain_cause,
+            'domain_trend_last_minus_first': domain_trend,
         },
         'particle_reconstruction': {
             'data': C_results,
@@ -396,17 +387,12 @@ def run_task3(S=10, base_seed=42):
         },
     }
 
-    if err_numgrad > 0.3 * plateau_l2:
-        primary_cause = "transform_differentiation_plus_particle_noise"
-    elif domain_cause == "boundary_mismatch_significant":
-        primary_cause = "boundary_mismatch"
-    else:
-        primary_cause = "combination_particle_reconstruction_and_differentiation"
-
-    decomposition['primary_cause'] = primary_cause
-    print(f"\n  PRIMARY CAUSE: {primary_cause}")
+    print("\n  Evidence (attribution is established by the controlled "
+          "studies, not classified here):")
     print(f"  Differentiation error (exact phi): {err_numgrad:.4f}")
     print(f"  1% phi noise error: {err_noise_1pct:.4f}")
+    if domain_trend is not None:
+        print(f"  Domain trend (largest L minus smallest L): {domain_trend:+.4f}")
 
     with open(_mk(OUT_BASE, 'plateau_decomposition.json'), 'w') as f:
         json.dump(decomposition, f, indent=2)
@@ -432,7 +418,7 @@ def run_task3(S=10, base_seed=42):
     fig.tight_layout()
     _savefig(fig, _mk(OUT_BASE, 'cole_hopf_plateau_decomposition'))
 
-    print(f"\n  [Task 3] Done. Primary cause: {primary_cause}")
+    print("\n  [Task 3] Done.")
     return decomposition
 
 

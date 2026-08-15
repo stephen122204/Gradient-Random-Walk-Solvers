@@ -18,7 +18,7 @@
       50000
     ]
   },
-  "no_dt_study_reason": "Heat GRW is exact in time: Brownian increments are drawn exactly from N(0, 2*alpha*dt), with no discretization error in the stochastic dynamics. The only approximation is in the initial condition (number of particles N) and the histogram reconstruction. Therefore, the convergence study only needs N-refinement.",
+  "no_dt_study_reason": "The Brownian diffusion substep has no time-discretization error: increments drawn from N(0, 2*alpha*dt) compose to the exact Brownian transition over T. The measured errors instead come from finite sampling, cumulative reconstruction/evaluation, and the difference between the reflected finite-domain calculation and the infinite-domain reference. Therefore this study refines N rather than dt.",
   "fit": {
     "total_slope": -0.45680758867457416,
     "total_ci": [

@@ -1,8 +1,7 @@
 {
   "plateau_l2_observed": 0.4,
   "transform_differentiation": {
-    "error_exact_phi_num_grad": 0.0007078950587756901,
-    "conclusion": "transform_differentiation_negligible"
+    "error_exact_phi_num_grad": 0.0007078950587756901
   },
   "boundary_mismatch": {
     "error_by_domain": {
@@ -11,7 +10,7 @@
       "10.0": 0.5642724341092675,
       "16.0": 2.254069092785838
     },
-    "conclusion": "boundary_mismatch"
+    "domain_trend_last_minus_first": 1.8633876313190296
   },
   "particle_reconstruction": {
     "data": [
@@ -78,6 +77,5 @@
         "l2_std": 0.02586064183528218
       }
     ]
-  },
-  "primary_cause": "combination_particle_reconstruction_and_differentiation"
+  }
 }

@@ -1,8 +1,10 @@
 """Task 4: Extended Heat convergence study.
 
-N in {500, ..., 50000}, 30 paired seeds per N, bias/spread/total decomposition.
-No dt-refinement study: Heat GRW is exact in time (Brownian increments are
-exact), which is documented in the output JSON.
+N in {500, ..., 50000}, with the same 30 seed identifiers used at every N
+(not a strict common-random-number coupling because the sample size changes),
+and a bias/spread/total decomposition. No dt-refinement study is needed for
+the Brownian diffusion substep, whose Gaussian increments compose to the
+exact transition law; this is documented in the output JSON.
 Output: output/final_prepublication_tests/heat_extended/
 """
 import csv
@@ -109,11 +111,12 @@ def run_task4(N_seq=None, S=30, base_seed=42,
         N_seq = [500, 1000, 2000, 5000, 10000, 20000, 50000]
 
     no_dt_reason = (
-        "Heat GRW is exact in time: Brownian increments are drawn exactly "
-        "from N(0, 2*alpha*dt), with no discretization error in the stochastic "
-        "dynamics. The only approximation is in the initial condition "
-        "(number of particles N) and the histogram reconstruction. "
-        "Therefore, the convergence study only needs N-refinement."
+        "The Brownian diffusion substep has no time-discretization error: "
+        "increments drawn from N(0, 2*alpha*dt) compose to the exact Brownian "
+        "transition over T. The measured errors instead come from finite "
+        "sampling, cumulative reconstruction/evaluation, and the difference "
+        "between the reflected finite-domain calculation and the infinite-"
+        "domain reference. Therefore this study refines N rather than dt."
     )
     print(f"\n  NOTE: {no_dt_reason}\n")
 
@@ -341,9 +344,9 @@ def run_task4(N_seq=None, S=30, base_seed=42,
     fig, ax = plt.subplots(figsize=(6, 2))
     ax.axis('off')
     ax.text(0.5, 0.5,
-            'No dt study: Heat GRW has no time-discretization error.\n'
-            'Brownian increments are drawn exactly from N(0, 2αΔt).\n'
-            'Only source of error: N (particle count + histogram reconstruction).',
+            'No dt study: the Brownian diffusion substep has no time-discretization error.\n'
+            'The reported error comes from sampling, reconstruction/evaluation,\n'
+            'and the finite-domain reference gap.',
             ha='center', va='center', fontsize=10, wrap=True,
             bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
     ax.set_title('Heat GRW: why no dt study is needed')

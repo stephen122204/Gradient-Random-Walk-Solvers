@@ -1,6 +1,7 @@
 """Task 5: Extended FHN convergence study.
 
-N in {100, ..., 5000}, 30 paired seeds per N; profile metrics (L1/L2/Linf/rel-L2),
+N in {100, ..., 5000}, with the same 30 seed identifiers used at every N
+(not a strict common-random-number coupling); profile metrics (L1/L2/Linf/rel-L2),
 front center/speed/aligned-profile errors with separate fitted rates, a dt
 refinement at fixed N, and front center vs time.
 Output: output/final_prepublication_tests/fhn_extended/

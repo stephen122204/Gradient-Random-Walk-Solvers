@@ -21,13 +21,17 @@ Targets
                                   # seed-42 simulations before plotting
                                   # (overwrites figure_data/representative_figure_arrays.npz)
     python reproduce.py ensembles # multi-seed ensemble, paired-grid, and
-                                  # Cole-Hopf control studies (t4 t7 t5 t3)
-    python reproduce.py t3|t4|t5|t7
+                                  # Cole-Hopf control studies (t4 t7 t5 t3 t8)
+    python reproduce.py t3|t4|t5|t7|t8
                                   # one ensemble study (see verify_ensembles.py)
     python reproduce.py verify-ensembles
-                                  # re-run all four ensemble studies and compare
+                                  # re-run all five ensemble studies and compare
                                   # every pinned numeric field against
                                   # pinned_ensembles/ (PASS/FAIL)
+    python reproduce.py paper1-figures
+                                  # regenerate every combined-paper figure into
+                                  # output/final_prepublication_tests/paper_figures/
+                                  # with a SHA-256 provenance manifest
 
 All paper configurations are pinned inside study_paper_refinement.py,
 figure_scripts/regenerate_paper_figures.py (seed 42 throughout), and the
@@ -281,13 +285,14 @@ def verify(deep: bool = False) -> int:
 
 def main() -> int:
     args = sys.argv[1:]
-    known = {"studies", "figures", "all", "verify",
-             "ensembles", "verify-ensembles", "t3", "t4", "t5", "t7"}
+    known = {"studies", "figures", "all", "verify", "ensembles",
+             "verify-ensembles", "paper1-figures",
+             "t3", "t4", "t5", "t7", "t8"}
     if not args or args[0] not in known:
         print(__doc__)
         return 2
     target = args[0]
-    if target in {"t3", "t4", "t5", "t7"}:
+    if target in {"t3", "t4", "t5", "t7", "t8"}:
         import verify_ensembles
         verify_ensembles.run_study(target)
         return 0
@@ -299,6 +304,71 @@ def main() -> int:
     if target == "verify-ensembles":
         import verify_ensembles
         return verify_ensembles.verify(rerun="--no-rerun" not in args)
+    if target == "paper1-figures":
+        import hashlib
+        import shutil
+        import tempfile
+
+        ens_out = ROOT / "output" / "final_prepublication_tests"
+        paper_dir = ens_out / "paper_figures"
+        if paper_dir.exists():
+            shutil.rmtree(paper_dir)
+        paper_dir.mkdir(parents=True, exist_ok=True)
+
+        # The representative generator normally writes to a timestamped
+        # exploration directory. Give it a private temporary destination here
+        # so this target never guesses which prior run is the newest.
+        with tempfile.TemporaryDirectory(prefix="paper1_figures_") as tmp:
+            representative_dir = Path(tmp)
+            subprocess.run(
+                [sys.executable,
+                 str(ROOT / "figure_scripts" / "regenerate_paper_figures.py"),
+                 "--output-dir", str(representative_dir)],
+                cwd=ROOT,
+                check=True,
+            )
+            for name in ("heat_comparison.pdf", "fhn_comparison.pdf",
+                         "fhn_diagnostics.pdf", "burgers_diagnostics.pdf"):
+                shutil.copy2(representative_dir / name, paper_dir / name)
+
+        # The six ensemble/control figures are always redrawn from committed
+        # pinned data. A clean checkout therefore needs no prior study output.
+        subprocess.run([sys.executable,
+                        str(ROOT / "figure_scripts" / "regenerate_ensemble_figures.py")],
+                       cwd=ROOT, check=True)
+
+        wanted = {
+            "heat_comparison.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",
+            "fhn_comparison.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",
+            "fhn_diagnostics.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",
+            "burgers_diagnostics.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",
+            "heat_bias_spread_total_vs_N.pdf": "pinned_ensembles/heat_extended/summary_by_N.csv",
+            "fhn_convergence.pdf": "pinned_ensembles/fhn_extended/summary_by_N.csv",
+            "heat_grid_paired.pdf": "pinned_ensembles/heat_grid_paired/summary.json",
+            "burgers_decoupled.pdf": "pinned_ensembles/burgers_controls/summary.json",
+            "burgers_boundary_domain.pdf": "pinned_ensembles/burgers_controls/summary.json",
+            "burgers_perturbation_response.pdf": "pinned_ensembles/burgers_controls/summary.json",
+        }
+        manifest = {}
+        for name, source in wanted.items():
+            path = paper_dir / name
+            if path.exists():
+                digest = hashlib.sha256(path.read_bytes()).hexdigest()
+                manifest[name] = {
+                    "source": source,
+                    "sha256": digest,
+                    "bytes": path.stat().st_size,
+                }
+            else:
+                manifest[name] = {"source": source, "sha256": None,
+                                  "error": "not generated"}
+        with (paper_dir / "paper1_figure_manifest.json").open("w") as stream:
+            json.dump(manifest, stream, indent=2)
+        missing = [k for k, v in manifest.items() if v["sha256"] is None]
+        print(f"\npaper1-figures: {len(manifest) - len(missing)}/{len(manifest)} "
+              f"canonical figures in {paper_dir.relative_to(ROOT)}/ "
+              f"(manifest: paper1_figure_manifest.json)")
+        return 1 if missing else 0
     if target == "studies":
         elapsed = run_studies()
         print(f"\nstudies target complete in {elapsed:.1f}s "

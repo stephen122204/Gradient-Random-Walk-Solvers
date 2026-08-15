@@ -8,8 +8,9 @@ controlled-diagnosis sections:
     t7  paired heat output-grid study (coupled vs fixed 300/400-bin grids)
     t5  scalar FHN thirty-seed profile/center/speed/aligned convergence
     t3  Cole--Hopf plateau: four controlled experiments
+    t8  Burgers decoupled, boundary, perturbation, and domain controls
 
-`verify` re-runs all four studies from scratch and compares every pinned
+`verify` re-runs all five studies from scratch and compares every pinned
 numeric field against pinned_ensembles/ (committed, human-readable copies of
 the study outputs).  Wall-clock timing fields and floating-point identity
 residuals (~1e-16, platform noise) are excluded from comparison.  Float
@@ -17,9 +18,9 @@ tolerance: rel 1e-9 / abs 1e-12 — far above cross-platform noise, far below
 the precision at which any value is reported in the paper.
 
 Usage:
-    python verify_ensembles.py verify          # re-run all four + compare
+    python verify_ensembles.py verify          # re-run all five + compare
     python verify_ensembles.py verify --no-rerun   # compare existing outputs
-    python verify_ensembles.py t4|t5|t3|t7     # run one study
+    python verify_ensembles.py t3|t4|t5|t7|t8  # run one study
 """
 from __future__ import annotations
 
@@ -39,6 +40,7 @@ STUDIES = {
     "t7": ("studies/study_t7_heat_grid_paired.py", "heat_grid_paired"),
     "t5": ("studies/study_t5_fhn_extended.py", "fhn_extended"),
     "t3": ("studies/study_t3_cole_hopf_plateau.py", "cole_hopf_plateau"),
+    "t8": ("studies/study_t8_burgers_controls.py", "burgers_controls"),
 }
 
 REL_TOL = 1e-9

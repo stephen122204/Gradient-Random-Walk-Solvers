@@ -137,6 +137,18 @@ def validate_config_dict(data: dict) -> None:
                     f"See config_template.jsonc for documentation."
                 )
 
+    if eq == "burgers":
+        if diff_constant <= 0:
+            raise ValueError(
+                "'diff_constant' (viscosity) must be > 0 for the Cole--Hopf "
+                f"Burgers solver, got {diff_constant}."
+            )
+        if num_points < 2:
+            raise ValueError(
+                "'num_points' must be >= 2 for the Cole--Hopf Burgers solver, "
+                f"got {num_points}."
+            )
+
     if eq == "heat":
         heat_ic = data.get("heat_initial_condition", {})
         ic_type = str(heat_ic.get("type", "step")).strip().lower()
