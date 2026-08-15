@@ -1,4 +1,4 @@
-"""Fast release tests for solver and experiment invariants used in Paper 1."""
+"""Small smoke tests for solver formulas, boundaries, and paper controls."""
 
 import unittest
 
