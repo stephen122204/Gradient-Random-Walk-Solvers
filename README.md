@@ -1,4 +1,4 @@
-# Gradient Random Walk Methods for the Heat, FitzHugh–Nagumo, and Viscous Burgers Equations
+# Gradient Random Walk Methods for the Heat, FitzHugh–Nagumo, and Burgers' Equations
 
 Python software and reproducible numerical examples for the paper
 *On the Accuracy of Gradient Random Walk Methods for the Heat,
