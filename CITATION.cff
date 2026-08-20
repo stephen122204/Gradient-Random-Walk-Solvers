@@ -8,7 +8,7 @@ authors:
   - family-names: Daripa
     given-names: Prabir
     affiliation: "Department of Mathematics, Texas A&M University"
-repository-code: "https://github.com/stephen122204/heat_burgers_fhn"
+repository-code: "https://github.com/Daripa-Research-Group/Gradient-Random-Walk-Solvers"
 license: MIT
 preferred-citation:
   type: article
