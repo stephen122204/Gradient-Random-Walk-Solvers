@@ -13,8 +13,8 @@ The repository supports two uses:
 ## Install
 
 ```bash
-git clone https://github.com/stephen122204/heat_burgers_fhn.git
-cd heat_burgers_fhn
+git clone https://github.com/Daripa-Research-Group/Gradient-Random-Walk-Solvers.git
+cd Gradient-Random-Walk-Solvers
 git checkout grw-solvers-v3
 python -m venv .venv
 source .venv/bin/activate
@@ -117,3 +117,8 @@ comparisons. They can be copied and edited for new studies.
 ## Citation
 
 See `CITATION.cff`.
+
+## Acknowledgments
+
+The authors thank Oliver Stalker for providing an early version of the
+Python code.
