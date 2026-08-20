@@ -9,7 +9,7 @@ authors:
     given-names: Prabir
     affiliation: "Department of Mathematics, Texas A&M University"
 repository-code: "https://github.com/stephen122204/heat_burgers_fhn"
-license: NOASSERTION  # TODO(license): update once a LICENSE file is chosen
+license: MIT
 preferred-citation:
   type: article
   title: "On the Accuracy of Gradient Random Walk Methods for the Heat, FitzHugh–Nagumo, and Burgers' Equations"
