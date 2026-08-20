@@ -126,16 +126,16 @@ def heat_grid_paired():
         'fixed400e': dict(color='#c51b7d', marker='v', ls='--'),
     }
     labels = {
-        'coupled': 'coupled grid ($M=N$)',
+        'coupled': 'coupled points ($M=N$)',
         'fixed300': 'fixed $M=300$, bin center',
         'fixed300e': 'fixed $M=300$, right edge',
         'fixed400': 'fixed $M=400$, bin center',
         'fixed400e': 'fixed $M=400$, right edge',
     }
     fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.2))
-    for arm in ('coupled', 'fixed300', 'fixed300e'):
-        y = np.array([float(r['E_total']) for r in results[arm]])
-        axL.loglog(N, y, lw=1.6, ms=5, label=labels[arm], **styles[arm])
+    for treatment in ('coupled', 'fixed300', 'fixed300e'):
+        y = np.array([float(r['E_total']) for r in results[treatment]])
+        axL.loglog(N, y, lw=1.6, ms=5, label=labels[treatment], **styles[treatment])
     guide = np.array([N.min(), N.max()])
     y0 = float(results['coupled'][0]['E_total'])
     axL.loglog(guide, y0 * (guide / N[0]) ** -0.5, ':', color=GUIDE,
@@ -145,9 +145,9 @@ def heat_grid_paired():
     axL.legend(fontsize=8)
     axL.text(0.02, 0.02, '(a)', transform=axL.transAxes, fontsize=11)
 
-    for arm in ('fixed300', 'fixed400', 'fixed300e', 'fixed400e', 'coupled'):
-        y = np.array([float(r['E_bias']) for r in results[arm]])
-        axR.loglog(N, y, lw=1.4, ms=4, label=labels[arm], **styles[arm])
+    for treatment in ('fixed300', 'fixed400', 'fixed300e', 'fixed400e', 'coupled'):
+        y = np.array([float(r['E_bias']) for r in results[treatment]])
+        axR.loglog(N, y, lw=1.4, ms=4, label=labels[treatment], **styles[treatment])
     axR.axhline(float(control['M300']['center_compare']), color=GRW,
                 ls=':', lw=1.1, label='deterministic, bin center')
     axR.axhline(float(control['M400']['center_compare']), color=SECONDARY,
@@ -167,8 +167,8 @@ def burgers_decoupled():
     rows = data['decoupled']
     groups = [[r for r in rows if r['part'] == key] for key in ('A', 'B', 'C')]
     x_keys = ('P', 'M', 'sigma_x')
-    x_labels = (r'initialization-grid points $P$',
-                r'output-grid points $M$',
+    x_labels = (r'initialization points $P$',
+                r'reconstruction bins $M$',
                 r'physical bandwidth $\sigma_x$')
     fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.0))
     for i, (ax, group, x_key, x_label) in enumerate(

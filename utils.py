@@ -9,7 +9,10 @@ import matplotlib
 if sys.platform.startswith("darwin"):
     matplotlib.use("MacOSX")   # macOS native backend
 else:
-    matplotlib.use("TkAgg")    # cross-platform fallback
+    try:
+        matplotlib.use("TkAgg")    # cross-platform fallback
+    except ImportError:
+        matplotlib.use("Agg")      # headless fallback (no GUI toolkit present)
 
 import matplotlib.pyplot as plt
 import numpy as np

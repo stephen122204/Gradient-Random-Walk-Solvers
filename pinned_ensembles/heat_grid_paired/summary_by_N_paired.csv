@@ -1,4 +1,4 @@
-arm,N,S,E_bias,E_spread,E_total,identity_residual
+treatment,N,S,E_bias,E_spread,E_total,identity_residual
 coupled,500,30,0.00529827,0.02850072,0.02898901,1.20e-16
 coupled,1000,30,0.00261295,0.02040305,0.02056968,1.69e-16
 coupled,2000,30,0.00211374,0.01392762,0.01408711,2.46e-16

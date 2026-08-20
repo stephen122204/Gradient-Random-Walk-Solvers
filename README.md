@@ -7,7 +7,7 @@ Prabir Daripa.
 
 The repository supports two uses:
 
-1. reproduce the reported tables and figures; and
+1. reproduce the reported tables and figures, and
 2. modify the supplied configurations or study scripts to run new cases.
 
 ## Install
@@ -22,7 +22,7 @@ pip install -r requirements.txt
 ```
 
 The pinned environment uses Python 3.11.4. Generated files are written under
-`output/` or `outputs/`; both directories are ignored by Git.
+`output/` or `outputs/`. Both directories are ignored by Git.
 
 ## Reproduce the Paper
 
@@ -41,7 +41,7 @@ python reproduce.py ensembles
 ```
 
 The individual ensemble targets are `t4` (heat), `t7` (paired heat-grid
-control), `t5` (FitzHugh–Nagumo), `t3` (original Cole–Hopf diagnostics), and
+control), `t5` (FitzHugh–Nagumo), `t3` (Cole–Hopf plateau controls), and
 `t8` (controlled Burgers attribution). For example:
 
 ```bash
@@ -56,8 +56,19 @@ python reproduce.py verify-ensembles
 ```
 
 Use `python reproduce.py verify --deep` to re-run the archived representative
-simulations as well as the tabulated studies. Run `python reproduce.py` with no
-target to display every available command.
+simulations as well as the tabulated studies. One command covers everything,
+the deep representative checks followed by a full re-run and comparison of the
+five ensemble studies:
+
+```bash
+python reproduce.py verify-all
+```
+
+`verify` and `verify --deep` each complete in under a minute. `verify-all`
+re-runs all five ensemble studies from scratch and takes roughly 15--20 minutes
+on a typical laptop.
+
+Run `python reproduce.py` with no target to display every available command.
 
 ## Run a Modified Case
 
