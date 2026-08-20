@@ -1,8 +1,8 @@
 # Gradient Random Walk Methods for the Heat, FitzHugh–Nagumo, and Viscous Burgers Equations
 
 Python software and reproducible numerical examples for the paper
-*Controlled Error Attribution for Gradient Random Walk Methods Applied to the
-Heat, FitzHugh–Nagumo, and Viscous Burgers Equations* by Stephen Abkin and
+*On the Accuracy of Gradient Random Walk Methods for the Heat,
+FitzHugh–Nagumo, and Burgers' Equations* by Stephen Abkin and
 Prabir Daripa.
 
 The repository supports two uses:
@@ -15,7 +15,7 @@ The repository supports two uses:
 ```bash
 git clone https://github.com/stephen122204/heat_burgers_fhn.git
 cd heat_burgers_fhn
-git checkout grw-solvers-v1
+git checkout grw-solvers-v3
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -23,6 +23,14 @@ pip install -r requirements.txt
 
 The pinned environment uses Python 3.11.4. Generated files are written under
 `output/` or `outputs/`. Both directories are ignored by Git.
+
+## Check the Installation
+
+Confirm the environment works before the longer runs (takes a few seconds):
+
+```bash
+python -m unittest discover -s tests
+```
 
 ## Reproduce the Paper
 
@@ -103,13 +111,8 @@ comparisons. They can be copied and edited for new studies.
 - `figure_data/`, `pinned_ensembles/`, `expected_values.json`: committed data
   behind the reported values and figures.
 - `figure_scripts/`: figure generation.
-- `tests/`: small smoke tests for core formulas and boundary operations.
+- `tests/`: quick installation checks of core formulas and boundary operations.
 
-## Optional Smoke Test
-
-```bash
-python -m unittest discover -s tests
-```
 
 ## Citation
 

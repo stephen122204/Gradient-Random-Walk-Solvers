@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this code, please cite the paper below."
-title: "GRW Solvers — code for 'Controlled Error Attribution for Gradient Random Walk Methods Applied to the Heat, FitzHugh–Nagumo, and Viscous Burgers' Equations'"
+title: "GRW Solvers — code for 'On the Accuracy of Gradient Random Walk Methods for the Heat, FitzHugh–Nagumo, and Burgers' Equations'"
 authors:
   - family-names: Abkin
     given-names: Stephen
@@ -12,7 +12,7 @@ repository-code: "https://github.com/stephen122204/heat_burgers_fhn"
 license: NOASSERTION  # TODO(license): update once a LICENSE file is chosen
 preferred-citation:
   type: article
-  title: "Controlled Error Attribution for Gradient Random Walk Methods Applied to the Heat, FitzHugh–Nagumo, and Viscous Burgers' Equations"
+  title: "On the Accuracy of Gradient Random Walk Methods for the Heat, FitzHugh–Nagumo, and Burgers' Equations"
   authors:
     - family-names: Abkin
       given-names: Stephen
