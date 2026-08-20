@@ -49,7 +49,10 @@ import matplotlib
 if sys.platform.startswith("darwin"):
     matplotlib.use("MacOSX")
 else:
-    matplotlib.use("TkAgg")
+    try:
+        matplotlib.use("TkAgg")
+    except ImportError:
+        matplotlib.use("Agg")  # headless fallback (no GUI toolkit present)
 
 import matplotlib.pyplot as plt
 

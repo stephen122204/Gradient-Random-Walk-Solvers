@@ -84,10 +84,19 @@ def simulate_heat() -> dict[str, np.ndarray]:
     edges = np.linspace(0.0, length, 401)
     weights, _ = np.histogram(positions, bins=edges, weights=np.full(count, 1.0 / count))
     x_grid = 0.5 * (edges[:-1] + edges[1:])
+    # Same final particle state rebinned on 300 bins; the paper quotes this
+    # coarser-grid value next to the 400-bin reconstruction.
+    edges_300 = np.linspace(0.0, length, 301)
+    weights_300, _ = np.histogram(positions, bins=edges_300,
+                                  weights=np.full(count, 1.0 / count))
+    x_grid_300 = 0.5 * (edges_300[:-1] + edges_300[1:])
     return {
         "heat_x": x_grid,
         "heat_grw": np.cumsum(weights),
         "heat_exact": exact_heat(x_grid, time, alpha, center),
+        "heat_x_300": x_grid_300,
+        "heat_grw_300": np.cumsum(weights_300),
+        "heat_exact_300": exact_heat(x_grid_300, time, alpha, center),
     }
 
 
@@ -510,6 +519,8 @@ def compute_metrics(arrays: dict[str, np.ndarray]) -> dict[str, object]:
         "L2h": _l2h(arrays["heat_grw"], arrays["heat_exact"], arrays["heat_x"]),
         "Linf": _linf(arrays["heat_grw"], arrays["heat_exact"]),
         "rel_L2": _rel_l2(arrays["heat_grw"], arrays["heat_exact"], arrays["heat_x"]),
+        "L2h_nbins300": _l2h(arrays["heat_grw_300"], arrays["heat_exact_300"],
+                             arrays["heat_x_300"]),
         "total_weight": float(arrays["heat_grw"][-1]),
     }
     fhn_snapshots = {}

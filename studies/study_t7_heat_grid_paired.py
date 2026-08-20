@@ -23,7 +23,7 @@ then reconstructed under five output-grid treatments:
               edge of bin k, so that is where the reference is evaluated)
   fixed400e : the same with 400 bins
 
-The center-compare and edge-compare arms share the identical reconstruction
+The center-compare and edge-compare treatments share the identical reconstruction
 vector, so their stochastic spreads agree; only the deterministic comparison
 convention differs.
 
@@ -35,7 +35,7 @@ and the grid-independent finite-domain residual of the aligned convention
 (0.00109), with no stochastic input.
 
 Uncertainty: realization-level bootstrap confidence intervals for the fitted
-total/spread/bias slopes of every arm, obtained by resampling the 30
+total/spread/bias slopes of every treatment, obtained by resampling the 30
 realizations within each particle count (Gram-matrix formulation, n_boot
 5000, rng seed 12345, matching the FHN study's procedure).
 
@@ -83,15 +83,15 @@ def _run_heat_one(N, alpha, T, dt, L, x0, uL, uR, seed):
     from simulation import simulate_heat_equation
     np.random.seed(seed)
 
-    weight = (uL - uR) / N
+    weight = (uR - uL) / N
     ic = [(x0, weight)] * N
 
     cfg = SimulationConfig(
         equation_type='heat',
         domain_type='Finite',
         domain_size=L,
-        boundary_conditions={'LEFT': {'type': 'Dirichlet', 'value': float(uR)},
-                             'RIGHT': {'type': 'Dirichlet', 'value': float(uL)}},
+        boundary_conditions={'LEFT': {'type': 'Dirichlet', 'value': float(uL)},
+                             'RIGHT': {'type': 'Dirichlet', 'value': float(uR)}},
         diff_constant=alpha,
         time_step=dt,
         total_time=T,
@@ -108,12 +108,12 @@ def _run_heat_one(N, alpha, T, dt, L, x0, uL, uR, seed):
     w_arr = np.array([g['value']    for g in result])
     order    = np.argsort(x_pos)
     x_sorted = x_pos[order]
-    u_sorted = float(uR) + np.cumsum(w_arr[order])
+    u_sorted = float(uL) + np.cumsum(w_arr[order])
     return x_pos, w_arr, x_sorted, u_sorted, elapsed
 
 
 def _bootstrap_slope_ci(x_arr, y_arr, n_boot=2000, ci=0.95, rng=None):
-    """Design-point (level-resampling) CI; retained so the coupled arm's
+    """Design-point (level-resampling) CI; retained so the coupled treatment's
     rng(303) fit sequence reproduces t4's published values exactly."""
     if rng is None:
         rng = np.random.default_rng(77)
@@ -186,7 +186,7 @@ def _operator_control(L, x0, alpha, T, fixed):
 
     The reflecting walls give the position density by the method of images.
     Binning its exact per-bin masses and summing reproduces the reconstruction
-    the particle arms approximate, with no stochastic input.
+    the particle treatments approximate, with no stochastic input.
     """
     s = sqrt(2 * alpha * T)
     erfv = np.vectorize(erf)
@@ -219,17 +219,17 @@ def _operator_control(L, x0, alpha, T, fixed):
 
 
 def run_task7(N_seq=None, S=30, base_seed=42,
-              alpha=0.5, T=0.5, L=4.0, x0=2.0, uL=1.0, uR=0.0,
+              alpha=0.5, T=0.5, L=4.0, x0=2.0, uL=0.0, uR=1.0,
               dt=0.005):
     os.makedirs(OUT_BASE, exist_ok=True)
     if N_seq is None:
         N_seq = [500, 1000, 2000, 5000, 10000, 20000, 50000]
 
-    arms = ['coupled'] + [f'fixed{M}' for M in FIXED_BINS] \
+    treatments = ['coupled'] + [f'fixed{M}' for M in FIXED_BINS] \
                        + [f'fixed{M}e' for M in FIXED_BINS]
 
     print(f"{'='*60}\n  Task 7 (v2): Paired heat output-grid study\n"
-          f"  N_seq={N_seq}  S={S}  arms={arms}\n{'='*60}")
+          f"  N_seq={N_seq}  S={S}  treatments={treatments}\n{'='*60}")
 
     fixed = {}
     for M in FIXED_BINS:
@@ -238,8 +238,8 @@ def run_task7(N_seq=None, S=30, base_seed=42,
         dxM     = float(edges[1] - edges[0])
         fixed[M] = {
             'edges': edges, 'centers': centers, 'dx': dxM,
-            'u_exact_center': exact_heat_step(centers, T, x0, uR, uL, alpha),
-            'u_exact_edge':   exact_heat_step(edges[1:], T, x0, uR, uL, alpha),
+            'u_exact_center': exact_heat_step(centers, T, x0, uL, uR, alpha),
+            'u_exact_edge':   exact_heat_step(edges[1:], T, x0, uL, uR, alpha),
         }
 
     control = _operator_control(L, x0, alpha, T, fixed)
@@ -251,17 +251,17 @@ def run_task7(N_seq=None, S=30, base_seed=42,
     print(f"    finite-domain reference gap (fine grid): "
           f"{control['finite_domain_reference_gap']:.5f}")
 
-    results = {arm: [] for arm in arms}
-    grams   = {arm: [] for arm in arms}
+    results = {treatment: [] for treatment in treatments}
+    grams   = {treatment: [] for treatment in treatments}
 
     for N in N_seq:
         x_grid = np.linspace(0.0, L, N)
-        u_exact = exact_heat_step(x_grid, T, x0, uR, uL, alpha)
+        u_exact = exact_heat_step(x_grid, T, x0, uL, uR, alpha)
         dx = float(x_grid[1] - x_grid[0])
 
         print(f"\n  N={N}")
         seeds = [base_seed + i for i in range(S)]
-        runs = {arm: [] for arm in arms}
+        runs = {treatment: [] for treatment in treatments}
 
         for s_idx, seed in enumerate(seeds):
             x_pos, w_arr, x_out, u_out, elapsed = _run_heat_one(
@@ -269,50 +269,50 @@ def run_task7(N_seq=None, S=30, base_seed=42,
 
             if len(x_out) != N or not np.allclose(x_out, x_grid, atol=1e-10):
                 u_coupled = np.interp(x_grid, x_out, u_out,
-                                      left=float(uR), right=float(uL))
+                                      left=float(uL), right=float(uR))
             else:
                 u_coupled = u_out
             runs['coupled'].append(u_coupled)
 
             for M in FIXED_BINS:
                 bin_w, _ = np.histogram(x_pos, bins=fixed[M]['edges'], weights=w_arr)
-                u_fixed = float(uR) + np.cumsum(bin_w)
+                u_fixed = float(uL) + np.cumsum(bin_w)
                 runs[f'fixed{M}'].append(u_fixed)
                 runs[f'fixed{M}e'].append(u_fixed)  # same vector, different reference
 
             if (s_idx + 1) % 10 == 0:
                 print(f"    {s_idx+1}/{S} seeds done")
 
-        for arm in arms:
-            if arm == 'coupled':
+        for treatment in treatments:
+            if treatment == 'coupled':
                 dxa, uexa = dx, u_exact
             else:
-                M = int(arm.replace('fixed', '').replace('e', ''))
+                M = int(treatment.replace('fixed', '').replace('e', ''))
                 dxa = fixed[M]['dx']
-                uexa = fixed[M]['u_exact_edge'] if arm.endswith('e') \
+                uexa = fixed[M]['u_exact_edge'] if treatment.endswith('e') \
                     else fixed[M]['u_exact_center']
-            u_arr = np.array(runs[arm])
+            u_arr = np.array(runs[treatment])
             E_bias, E_spread, E_total, ident = _decompose(u_arr, uexa, dxa)
-            grams[arm].append(_gram(u_arr, uexa, dxa))
-            results[arm].append({
-                'N': N, 'S': len(runs[arm]),
+            grams[treatment].append(_gram(u_arr, uexa, dxa))
+            results[treatment].append({
+                'N': N, 'S': len(runs[treatment]),
                 'E_bias': E_bias, 'E_spread': E_spread, 'E_total': E_total,
                 'identity_residual': ident,
             })
-            print(f"    {arm:10s} E_bias={E_bias:.5f}  E_spread={E_spread:.5f}  "
+            print(f"    {treatment:10s} E_bias={E_bias:.5f}  E_spread={E_spread:.5f}  "
                   f"E_total={E_total:.5f}")
 
     # ---- Fits ----
     fits = {}
-    for arm in arms:
-        N_arr  = np.array([r['N']        for r in results[arm]], dtype=float)
-        bias_a = np.array([r['E_bias']   for r in results[arm]])
-        spr_a  = np.array([r['E_spread'] for r in results[arm]])
-        tot_a  = np.array([r['E_total']  for r in results[arm]])
+    for treatment in treatments:
+        N_arr  = np.array([r['N']        for r in results[treatment]], dtype=float)
+        bias_a = np.array([r['E_bias']   for r in results[treatment]])
+        spr_a  = np.array([r['E_spread'] for r in results[treatment]])
+        tot_a  = np.array([r['E_total']  for r in results[treatment]])
 
-        # coupled arm reuses t4's exact rng sequence so its slopes AND
+        # coupled treatment reuses t4's exact rng sequence so its slopes AND
         # design-point CIs reproduce the published ensemble values
-        rng_ci = np.random.default_rng(303 if arm == 'coupled' else 400 + arms.index(arm))
+        rng_ci = np.random.default_rng(303 if treatment == 'coupled' else 400 + treatments.index(treatment))
         tot_lo, tot_hi = _bootstrap_slope_ci(N_arr, tot_a, rng=rng_ci)
         tot_slope = float(np.polyfit(np.log10(N_arr[tot_a > 0]),
                                      np.log10(tot_a[tot_a > 0]), 1)[0])
@@ -327,9 +327,9 @@ def run_task7(N_seq=None, S=30, base_seed=42,
                                      np.log10(np.maximum(spr_a, 1e-12)), 1)[0])
         spr_lo, spr_hi = _bootstrap_slope_ci(N_arr, spr_a, rng=rng_ci)
 
-        real_ci = _realization_boot_slopes(grams[arm], N_seq)
+        real_ci = _realization_boot_slopes(grams[treatment], N_seq)
 
-        fits[arm] = {
+        fits[treatment] = {
             'total_slope': tot_slope, 'total_ci_design': [tot_lo, tot_hi],
             'bias_slope': bias_slope, 'bias_ci_design': [bias_lo, bias_hi],
             'spread_slope': spr_slope, 'spread_ci_design': [spr_lo, spr_hi],
@@ -337,40 +337,40 @@ def run_task7(N_seq=None, S=30, base_seed=42,
             'spread_ci_realization': real_ci['spread'],
             'bias_ci_realization': real_ci['bias'],
         }
-        print(f"\n  [{arm}] slopes: total={tot_slope:.3f} "
+        print(f"\n  [{treatment}] slopes: total={tot_slope:.3f} "
               f"CI_real={real_ci['total']}  spread={spr_slope:.3f} "
               f"CI_real={real_ci['spread']}  bias={bias_slope:.3f}")
 
     # ---- Floor diagnostics ----
     N_max = max(N_seq)
     floor = {}
-    for arm in arms:
-        if arm == 'coupled':
+    for treatment in treatments:
+        if treatment == 'coupled':
             continue
-        row_max = [r for r in results[arm] if r['N'] == N_max][0]
+        row_max = [r for r in results[treatment] if r['N'] == N_max][0]
         crossover = None
-        for r in results[arm]:
+        for r in results[treatment]:
             if r['E_bias'] > r['E_spread']:
                 crossover = r['N']
                 break
-        floor[arm] = {
+        floor[treatment] = {
             'E_total_at_Nmax': row_max['E_total'],
             'E_bias_at_Nmax': row_max['E_bias'],
             'E_spread_at_Nmax': row_max['E_spread'],
             'bias_crossover_N': crossover,
         }
-    print("\n  Bias at N=%d by arm:" % N_max)
-    for arm, f in floor.items():
-        print(f"    {arm:10s} E_bias={f['E_bias_at_Nmax']:.5f}  "
+    print("\n  Bias at N=%d by treatment:" % N_max)
+    for treatment, f in floor.items():
+        print(f"    {treatment:10s} E_bias={f['E_bias_at_Nmax']:.5f}  "
               f"crossover_N={f['bias_crossover_N']}")
 
     # ---- Save ----
     with open(_mk(OUT_BASE, 'summary_by_N_paired.csv'), 'w', newline='') as f:
         w = csv.writer(f)
-        w.writerow(['arm', 'N', 'S', 'E_bias', 'E_spread', 'E_total', 'identity_residual'])
-        for arm in arms:
-            for r in results[arm]:
-                w.writerow([arm, r['N'], r['S'],
+        w.writerow(['treatment', 'N', 'S', 'E_bias', 'E_spread', 'E_total', 'identity_residual'])
+        for treatment in treatments:
+            for r in results[treatment]:
+                w.writerow([treatment, r['N'], r['S'],
                             f"{r['E_bias']:.8f}", f"{r['E_spread']:.8f}",
                             f"{r['E_total']:.8f}", f"{r['identity_residual']:.2e}"])
 
@@ -407,9 +407,9 @@ def run_task7(N_seq=None, S=30, base_seed=42,
               'fixed300e': 'fixed $M=300$, right edge',
               'fixed400':  'fixed $M=400$, bin center',
               'fixed400e': 'fixed $M=400$, right edge'}
-    for arm in ('coupled', 'fixed300', 'fixed300e'):
-        tot_a = np.array([r['E_total'] for r in results[arm]])
-        axL.loglog(N_arr, tot_a, lw=1.6, ms=5, label=labels[arm], **styles[arm])
+    for treatment in ('coupled', 'fixed300', 'fixed300e'):
+        tot_a = np.array([r['E_total'] for r in results[treatment]])
+        axL.loglog(N_arr, tot_a, lw=1.6, ms=5, label=labels[treatment], **styles[treatment])
     guide_ref = np.array([N_arr.min(), N_arr.max()])
     c0 = np.array([r['E_total'] for r in results['coupled']])[0] * N_arr[0]**0.5
     axL.loglog(guide_ref, c0 * guide_ref**(-0.5), 'k:', lw=1.2, label=r'$N^{-1/2}$ guide')
@@ -417,9 +417,9 @@ def run_task7(N_seq=None, S=30, base_seed=42,
     axL.legend(fontsize=8); axL.grid(True, which='both', alpha=0.3)
     axL.text(0.02, 0.02, '(a)', transform=axL.transAxes, fontsize=11)
 
-    for arm in ('fixed300', 'fixed400', 'fixed300e', 'fixed400e', 'coupled'):
-        bias_a = np.array([r['E_bias'] for r in results[arm]])
-        axR.loglog(N_arr, bias_a, lw=1.4, ms=4, label=labels[arm], **styles[arm])
+    for treatment in ('fixed300', 'fixed400', 'fixed300e', 'fixed400e', 'coupled'):
+        bias_a = np.array([r['E_bias'] for r in results[treatment]])
+        axR.loglog(N_arr, bias_a, lw=1.4, ms=4, label=labels[treatment], **styles[treatment])
     axR.axhline(control['M300']['center_compare'], color='tab:blue', ls=':', lw=1.1,
                 label='deterministic, bin center')
     axR.axhline(control['M400']['center_compare'], color='tab:purple', ls=':', lw=1.1)

@@ -7,9 +7,13 @@ with the exact configurations used in the paper. It does not modify, and
 must never modify, any solver or study code.
 
 Targets
-    python reproduce.py studies   # Figs 2, 5, 8 data + Table 1 data (seed 42)
-    python reproduce.py figures   # all 8 paper figures from archived arrays
-    python reproduce.py all       # studies + figures
+    python reproduce.py studies   # single-seed representative study data
+                                  # (seed 42; legacy diagnostics kept from the
+                                  # original verification study)
+    python reproduce.py figures   # representative-figure set from archived
+                                  # arrays (legacy set; the combined paper's
+                                  # ten figures come from the `paper` target)
+    python reproduce.py all       # studies + figures (representative layer)
     python reproduce.py verify    # re-run studies, compare every reported value
                                   # against expected_values.json (PASS/FAIL)
     python reproduce.py verify --deep
@@ -28,6 +32,10 @@ Targets
                                   # re-run all five ensemble studies and compare
                                   # every pinned numeric field against
                                   # pinned_ensembles/ (PASS/FAIL)
+    python reproduce.py verify-all
+                                  # release gate: verify --deep, then re-run and
+                                  # compare all five ensemble studies. PASS only
+                                  # if both groups pass.
     python reproduce.py paper     # regenerate the ten combined-paper figures
     python reproduce.py paper1-figures
                                   # compatibility alias for ``paper``; writes to
@@ -161,7 +169,7 @@ def verify(deep: bool = False) -> int:
             print(f"  PASS  {name}: every reported field matches within "
                   f"tolerance ({len(exp_rows)} rows)")
 
-    print("== 3/4  Recomputing representative (Table 2) metrics from archived arrays")
+    print("== 3/4  Recomputing representative metrics from archived arrays")
     sys.path.insert(0, str(ROOT / "figure_scripts"))
     import regenerate_paper_figures as figs  # noqa: E402  (wrapper import, read-only use)
 
@@ -171,6 +179,7 @@ def verify(deep: bool = False) -> int:
         "heat.L2h": metrics["heat"]["L2h"],
         "heat.Linf": metrics["heat"]["Linf"],
         "heat.rel_L2": metrics["heat"]["rel_L2"],
+        "heat.L2h_nbins300": metrics["heat"]["L2h_nbins300"],
         "fhn_t9.L2h": metrics["fhn"]["final"]["L2h"],
         "fhn_t9.Linf": metrics["fhn"]["final"]["Linf"],
         "fhn_t9.rel_L2": metrics["fhn"]["final"]["rel_L2"],
@@ -271,8 +280,8 @@ def verify(deep: bool = False) -> int:
         print(f"  checked {len(archived)} archived arrays against a fresh "
               f"seed-42 run ({elapsed:.1f}s): {bit_identical} bit-identical, "
               f"{len(archived) - bit_identical} within tolerance on this "
-              f"platform (all 37 are bit-identical under the pinned "
-              f"environment in requirements.txt)")
+              f"platform (all {len(archived)} are bit-identical under the "
+              f"pinned environment in requirements.txt)")
 
     print()
     if failures == 0:
@@ -287,12 +296,21 @@ def verify(deep: bool = False) -> int:
 def main() -> int:
     args = sys.argv[1:]
     known = {"studies", "figures", "all", "verify", "ensembles",
-             "verify-ensembles", "paper", "paper1-figures",
+             "verify-ensembles", "verify-all", "paper", "paper1-figures",
              "t3", "t4", "t5", "t7", "t8"}
     if not args or args[0] not in known:
         print(__doc__)
         return 2
     target = args[0]
+    if target == "verify-all":
+        deep_rc = verify(deep=True)
+        import verify_ensembles
+        ens_rc = verify_ensembles.verify(rerun=True)
+        ok = deep_rc == 0 and ens_rc == 0
+        print(f"\nVERIFY-ALL: {'PASS' if ok else 'FAIL'} — deep representative "
+              f"checks {'passed' if deep_rc == 0 else 'FAILED'}, ensemble "
+              f"comparisons {'passed' if ens_rc == 0 else 'FAILED'}.")
+        return 0 if ok else 1
     if target in {"t3", "t4", "t5", "t7", "t8"}:
         import verify_ensembles
         verify_ensembles.run_study(target)

@@ -1,5 +1,5 @@
 {
-  "_comment": "Expected values for reproduce.py verify. study_csvs holds the exact field strings of the checked-in figure_data CSVs (runtime_s is machine-specific and ignored). representative_metrics are the Table 2 norms, the Table 1 RMSE decomposition at L=4, and the Fig. 4 front locations, computed from figure_data/representative_figure_arrays.npz (seed 42).",
+  "_comment": "Expected values for reproduce.py verify. study_csvs holds the exact field strings of the checked-in figure_data CSVs (runtime_s is machine-specific and ignored). representative_metrics are the heat representative norms (including the 300-bin value), the FHN representative norms at t=9, the Burgers representative L2h norm, and the representative front locations, computed from figure_data/representative_figure_arrays.npz (seed 42). derived_values are documented derivations from printed inputs.",
   "study_csvs": {
     "heat_refinement_summary.csv": [
       {
@@ -154,6 +154,7 @@
     "heat.L2h": 0.011940769001878848,
     "heat.Linf": 0.01615755256165019,
     "heat.rel_L2": 0.005437975750330314,
+    "heat.L2h_nbins300": 0.01579881390362825,
     "fhn_t9.L2h": 0.04947946606969819,
     "fhn_t9.Linf": 0.030793747846871944,
     "fhn_t9.rel_L2": 0.012288540698867598,
