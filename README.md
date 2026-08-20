@@ -120,5 +120,7 @@ See `CITATION.cff`.
 
 ## Acknowledgments
 
+__Principal Investigator__: [Professor Prabir Daripa](https://artsci.tamu.edu/mathematics/contact/profiles/prabir-daripa.html) - Texas A&M University, Department of Mathematics
+ 
 The authors thank Oliver Stalker for providing an early version of the
 Python code.
