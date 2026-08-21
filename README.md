@@ -121,6 +121,7 @@ See `CITATION.cff`.
 ## Acknowledgments
 
 __Principal Investigator__: [Professor Prabir Daripa](https://artsci.tamu.edu/mathematics/contact/profiles/prabir-daripa.html) - Texas A&M University, Department of Mathematics
+- Other projects from the Daripa Research Group are available on the [group's GitHub page](https://github.com/Daripa-Research-Group).
  
 The authors thank Oliver Stalker for providing an early version of the
 Python code.
