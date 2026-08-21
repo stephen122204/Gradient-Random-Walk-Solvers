@@ -91,9 +91,9 @@ def fhn_convergence():
     N = np.array([float(r['N']) for r in rows])
     panels = [
         (np.array([float(r['l2_mean']) for r in rows]),
-         r'profile $L^2$ error', GRW, 'o'),
+         r'profile $L_h^2$ error', GRW, 'o'),
         (np.array([float(r['ce_mean']) for r in rows]),
-         r'front-center error', DET, 's'),
+         r'front-location error', DET, 's'),
         (np.array([float(r['ap_mean']) for r in rows]),
          r'aligned-profile error', SECONDARY, 'd'),
     ]
@@ -201,7 +201,8 @@ def burgers_boundary_domain():
     fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.0))
     L = [float(r['L']) for r in boundary]
     axL.semilogy(L, [float(r['E_det_pinned_rmse']) for r in boundary],
-                 's-', color=DET, ms=5, lw=1.6, label='pinned endpoints')
+                 's-', color=DET, ms=5, lw=1.6,
+                 label='fixed-endpoint boundary data')
     axL.semilogy(L, [float(r['E_det_exactBC_rmse']) for r in boundary],
                  'o-', color='#1b7837', ms=5, lw=1.6,
                  label='exact transformed boundary data')

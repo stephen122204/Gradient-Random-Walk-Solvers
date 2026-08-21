@@ -1,4 +1,4 @@
-# Gradient Random Walk Methods for the Heat, FitzHugh–Nagumo, and Burgers' Equations
+# Gradient Random Walk Solvers for the Heat, FitzHugh–Nagumo, and Burgers' Equations
 
 Python software and reproducible numerical examples for the paper
 *On the Accuracy of Gradient Random Walk Methods for the Heat,
@@ -12,13 +12,51 @@ The repository supports two uses:
 
 ## Install
 
+For the archived version 1.0.0 release, download and extract the ZIP from
+[Zenodo](https://doi.org/10.5281/zenodo.22050659), then open a terminal in the
+extracted directory:
+
 ```bash
-git clone https://github.com/Daripa-Research-Group/Gradient-Random-Walk-Solvers.git
+cd Gradient-Random-Walk-Solvers-1.0.0
+```
+
+Alternatively, clone the development repository:
+
+```bash
+git clone https://github.com/stephen122204/Gradient-Random-Walk-Solvers.git
 cd Gradient-Random-Walk-Solvers
 git checkout grw-solvers-v3
+```
+
+Create a Python 3.11 environment:
+
+```bash
 python -m venv .venv
+```
+
+Activate it on macOS or Linux:
+
+```bash
 source .venv/bin/activate
-pip install -r requirements.txt
+```
+
+On Windows PowerShell, use:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+On Windows Command Prompt, use:
+
+```bat
+.venv\Scripts\activate.bat
+```
+
+Then install the pinned dependencies on any platform:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
 The pinned environment uses Python 3.11.4. Generated files are written under
@@ -116,12 +154,16 @@ comparisons. They can be copied and edited for new studies.
 
 ## Citation
 
-See `CITATION.cff`.
+Version 1.0.0 is archived on Zenodo:
+[https://doi.org/10.5281/zenodo.22050659](https://doi.org/10.5281/zenodo.22050659).
+See `CITATION.cff` for complete citation metadata.
 
 ## Acknowledgments
 
-__Principal Investigator__: [Professor Prabir Daripa](https://artsci.tamu.edu/mathematics/contact/profiles/prabir-daripa.html) - Texas A&M University, Department of Mathematics
-- Other projects from the Daripa Research Group are available on the [group's GitHub page](https://github.com/Daripa-Research-Group).
- 
 The authors thank Oliver Stalker for providing an early version of the
 Python code.
+
+**Principal Investigator:** [Professor Prabir Daripa](https://artsci.tamu.edu/mathematics/contact/profiles/prabir-daripa.html) — Texas A&M University, Department of Mathematics
+
+Other projects from the Daripa Research Group are available on the
+[group's GitHub page](https://github.com/Daripa-Research-Group).

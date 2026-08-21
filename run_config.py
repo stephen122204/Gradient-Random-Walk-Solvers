@@ -15,10 +15,12 @@ from __future__ import annotations
 
 import argparse
 import os
+import tempfile
 from pathlib import Path
 
-os.environ.setdefault("MPLCONFIGDIR", "/tmp/grw-mpl")
-os.environ.setdefault("XDG_CACHE_HOME", "/tmp/grw-cache")
+_TEMP_ROOT = Path(tempfile.gettempdir())
+os.environ.setdefault("MPLCONFIGDIR", str(_TEMP_ROOT / "grw-mpl"))
+os.environ.setdefault("XDG_CACHE_HOME", str(_TEMP_ROOT / "grw-cache"))
 
 import config as config_module
 from utils import plot_results
