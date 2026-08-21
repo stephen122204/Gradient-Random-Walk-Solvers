@@ -1,14 +1,21 @@
 cff-version: 1.2.0
-message: "If you use this code, please cite the paper below."
-title: "GRW Solvers, code for 'On the Accuracy of Gradient Random Walk Methods for the Heat, FitzHugh–Nagumo, and Burgers' Equations'"
+message: "If you use this software, please cite this release and the accompanying paper."
+type: software
+title: "Gradient Random Walk Solvers for the Heat, FitzHugh–Nagumo, and Burgers' Equations"
 authors:
   - family-names: Abkin
     given-names: Stephen
     affiliation: "Department of Mathematics, Texas A&M University"
+    orcid: "https://orcid.org/0009-0000-5981-9721"
   - family-names: Daripa
     given-names: Prabir
     affiliation: "Department of Mathematics, Texas A&M University"
-repository-code: "https://github.com/Daripa-Research-Group/Gradient-Random-Walk-Solvers"
+    orcid: "https://orcid.org/0000-0002-8771-0149"
+version: 1.0.0
+date-released: 2026-08-21
+doi: 10.5281/zenodo.22050659
+url: "https://doi.org/10.5281/zenodo.22050659"
+repository-code: "https://github.com/stephen122204/Gradient-Random-Walk-Solvers"
 license: MIT
 preferred-citation:
   type: article
@@ -16,7 +23,9 @@ preferred-citation:
   authors:
     - family-names: Abkin
       given-names: Stephen
+      orcid: "https://orcid.org/0009-0000-5981-9721"
     - family-names: Daripa
       given-names: Prabir
+      orcid: "https://orcid.org/0000-0002-8771-0149"
   year: 2026
   notes: "arXiv id to be assigned"
