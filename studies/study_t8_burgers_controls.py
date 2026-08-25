@@ -1,4 +1,7 @@
-"""Task 8: Controlled attribution for the Cole-Hopf Burgers pipeline.
+"""Controlled attribution for the Cole-Hopf Burgers pipeline (manuscript
+`sec:colehopf-diagnosis`, `tab:burgers-decoupled-design`,
+`fig:burgers-decoupled`, `fig:burgers-boundary-domain`,
+`fig:burgers-perturbation-response`, arXiv:2608.22592; reproduce target: t8).
 
 The paper's coupled refinement varies three numerical choices together: the number of
 phi_x globs, the output-grid size (M = N), and the physical smoothing

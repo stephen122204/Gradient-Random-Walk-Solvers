@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """Regenerate all eight GRW paper figures from checked-in data or fixed-seed (42) runs.
 
+Four of these are the combined paper's representative figures
+(arXiv:2608.22592): heat_comparison `fig:heat-comparison`, fhn_comparison
+`fig:fhn-comparison`, fhn_diagnostics `fig:fhn-diagnostics`, and
+burgers_diagnostics `fig:burgers-diagnostics`. The `paper` target of
+reproduce.py copies them next to the six ensemble figures to assemble the
+paper's full ten-figure set.
+
 Figures 1, 3, 4, 6, 7 are drawn from the archived representative arrays in
 figure_data/representative_figure_arrays.npz (regenerable bit-for-bit with
 --rerun under the pinned environment of requirements.txt). Figures 2, 5, 8

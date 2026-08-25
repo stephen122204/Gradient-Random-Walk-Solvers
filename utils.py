@@ -1,3 +1,10 @@
+"""Plotting and exact-solution helpers for the interactive runner (main.py).
+
+Exploration path only: the paper's figures come from figure_scripts/ and the
+studies, not from these plotting routines. Exact profiles used for overlays
+(arXiv:2608.22592): heat step `eq:heat-exact`, FHN front `eq:fhn-exact`,
+Burgers stationary shock `eq:burgers-shock`.
+"""
 # matplotlib.use() must be called before pyplot is imported.
 import sys
 import os

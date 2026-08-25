@@ -1,3 +1,15 @@
+"""Configuration, validation, and initial-condition generators for the GRW
+solvers.
+
+SimulationConfig is the plain container consumed by simulation.py;
+validate_config_dict checks JSON configs (configs/, config_template.jsonc)
+before construction. The initial-condition generators implement the paper's
+initialization conventions (arXiv:2608.22592): the step-function delta
+initialization `eq:jump-initialization` (`sec:heat-benchmark`), the FHN
+quantile initialization `eq:fhn-quantile-initialization`
+(`sec:fhn-benchmark`), and the Burgers stationary-shock and traveling-wave
+data of `sec:burgers-benchmark` (`eq:burgers-shock`).
+"""
 import json
 import re
 
@@ -445,7 +457,7 @@ def generate_burgers_stationary_shock_ic(domain_size, num_points, nu, x_center=N
     The Cole-Hopf transform phi0 = exp(-Psi0 / (2*nu)) satisfies phi0(0) = phi0(L)
     (since Psi0(L) = integral of u0 over [0,L] = 0 by antisymmetry around x_center).
     This makes the reconstruction cumsum always return to its starting value, giving
-    a well-conditioned benchmark for the Cole-Hopf GRW with finite-domain boundaries.
+    a well-conditioned test problem for the Cole-Hopf GRW with finite-domain boundaries.
 
     :param domain_size: float, right endpoint [0, L]
     :param num_points: int, number of grid points / globs
@@ -472,7 +484,7 @@ def generate_burgers_traveling_wave_ic(domain_size, num_points, nu, x_center=Non
     which moves at unit speed and satisfies u_t + u*u_x = nu*u_xx exactly.
 
     Derivation: inserting the ansatz f(x - ct) into Burgers yields c = 1 and
-    the tanh width delta = sqrt(nu). This IC is the canonical benchmark used
+    the tanh width delta = sqrt(nu). This IC is the canonical test problem used
     to test the Cole-Hopf GRW path.
 
     :param domain_size: float, right endpoint of the domain [0, L]
