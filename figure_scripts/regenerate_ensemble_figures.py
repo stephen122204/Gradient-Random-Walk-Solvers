@@ -8,6 +8,10 @@
   burgers_boundary_domain       from pinned_ensembles/burgers_controls/summary.json
   burgers_perturbation_response from pinned_ensembles/burgers_controls/summary.json
 
+In the paper (arXiv:2608.22592) these are `fig:heat-bst`,
+`fig:fhn-convergence`, `fig:heat-grid-paired`, `fig:burgers-decoupled`,
+`fig:burgers-boundary-domain`, and `fig:burgers-perturbation-response`.
+
 Titleless, legends only, publication style matching regenerate_paper_figures.
 The study scripts also write diagnostic copies, but this script is the
 canonical paper-figure path. Output:

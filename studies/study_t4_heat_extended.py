@@ -1,4 +1,7 @@
-"""Task 4: Extended Heat convergence study.
+"""Extended heat convergence study: the paper's thirty-seed
+bias--spread--total decomposition (manuscript `sec:heat-ensemble`,
+`tab:heat-convergence`, `fig:heat-bst`, arXiv:2608.22592; reproduce
+target: t4).
 
 N in {500, ..., 50000}, with the same 30 seed identifiers used at every N
 (not a strict common-random-number coupling because the sample size changes),

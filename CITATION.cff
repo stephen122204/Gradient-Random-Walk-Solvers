@@ -28,4 +28,6 @@ preferred-citation:
       given-names: Prabir
       orcid: "https://orcid.org/0000-0002-8771-0149"
   year: 2026
-  notes: "arXiv id to be assigned"
+  doi: 10.48550/arXiv.2608.22592
+  url: "https://arxiv.org/abs/2608.22592"
+  notes: "arXiv preprint arXiv:2608.22592"

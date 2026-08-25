@@ -1,4 +1,5 @@
-"""Task 3: Diagnose the Cole-Hopf error plateau via four controlled experiments.
+"""Diagnose the Cole-Hopf error plateau via four controlled experiments
+(manuscript `sec:colehopf-diagnosis`, arXiv:2608.22592; reproduce target: t3).
 
   A: domain sensitivity (fixed shock, varying domain size)
   B: deterministic transform control (exact phi, then differentiate/invert)

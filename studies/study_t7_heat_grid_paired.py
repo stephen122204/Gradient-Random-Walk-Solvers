@@ -1,5 +1,7 @@
-"""Task 7 (v2): Paired heat output-grid study with aligned-evaluation
-correction and a deterministic operator control.
+"""Paired heat output-grid study with aligned-evaluation correction and a
+deterministic operator control (manuscript `sec:heat-grid-paired`,
+`tab:heat-grid-paired`, `fig:heat-grid-paired`, arXiv:2608.22592; reproduce
+target: t7).
 
 Same physical and numerical parameters, particle counts, and 30 seeds as the
 heat ensemble study (t4): alpha=0.5, domain [0,4], x0=2, increasing unit step,

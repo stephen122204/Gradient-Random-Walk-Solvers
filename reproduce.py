@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-reproduce.py — one command per paper artifact (Paper 1, GRW numerical study).
+reproduce.py — one command per artifact of the GRW accuracy paper
+(arXiv:2608.22592).
 
 Wrapper-only entry point: this script calls the existing study and figure code
 with the exact configurations used in the paper. It does not modify, and

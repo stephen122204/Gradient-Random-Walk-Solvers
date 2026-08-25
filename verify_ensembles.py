@@ -5,10 +5,17 @@ These are the studies behind the combined paper's ensemble, paired-grid, and
 controlled-diagnosis sections:
 
     t4  heat thirty-seed bias--spread--total decomposition
+        (`sec:heat-ensemble`, `tab:heat-convergence`)
     t7  paired heat output-grid study (coupled vs fixed 300/400-bin grids)
+        (`sec:heat-grid-paired`, `tab:heat-grid-paired`)
     t5  scalar FHN thirty-seed profile/center/speed/aligned convergence
+        (`sec:fhn-convergence`, `tab:fhn-convergence`)
     t3  Cole--Hopf plateau: four controlled experiments
+        (`sec:colehopf-diagnosis`)
     t8  Burgers decoupled, boundary, perturbation, and domain controls
+        (`sec:colehopf-diagnosis`, `tab:burgers-decoupled-design`)
+
+Section and table labels refer to the paper, arXiv:2608.22592.
 
 `verify` re-runs all five studies from scratch and compares every pinned
 numeric field against pinned_ensembles/ (committed, human-readable copies of

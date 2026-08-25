@@ -1,4 +1,7 @@
-"""Task 5: Extended FHN convergence study.
+"""Extended FHN convergence study: the paper's thirty-seed profile, front
+location, speed, and aligned-profile convergence (manuscript
+`sec:fhn-convergence`, `tab:fhn-convergence`, `fig:fhn-convergence`,
+arXiv:2608.22592; reproduce target: t5).
 
 N in {100, ..., 5000}, with the same 30 seed identifiers used at every N
 (not a strict common-random-number coupling); profile metrics (L1/L2/Linf/rel-L2),

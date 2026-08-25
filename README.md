@@ -3,7 +3,7 @@
 Python software and reproducible numerical examples for the paper
 *On the Accuracy of Gradient Random Walk Methods for the Heat,
 FitzHugh–Nagumo, and Burgers' Equations* by Stephen Abkin and
-Prabir Daripa.
+Prabir Daripa ([arXiv:2608.22592](https://doi.org/10.48550/arXiv.2608.22592)).
 
 The repository supports two uses:
 
@@ -110,9 +110,20 @@ five ensemble studies:
 python reproduce.py verify-all
 ```
 
-`verify` and `verify --deep` each complete in under a minute. `verify-all`
-re-runs all five ensemble studies from scratch and takes roughly 15--20 minutes
-on a typical laptop.
+Measured wall-clock times (Apple-Silicon laptop, pinned environment):
+
+| Command | What it covers | Wall clock |
+|---|---|---|
+| `python reproduce.py paper` | the paper's ten figures, from committed data | ~6 s |
+| `python reproduce.py verify --deep` | single-seed studies plus archived representative arrays (179 checks) | ~17 s |
+| `python reproduce.py t3` | Cole–Hopf plateau controls | ~2 s |
+| `python reproduce.py t8` | controlled Burgers attribution | ~4 s |
+| `python reproduce.py t5` | FitzHugh–Nagumo thirty-seed ensemble | ~15 s |
+| `python reproduce.py t4` | heat thirty-seed ensemble | ~1.5 min |
+| `python reproduce.py t7` | paired heat output-grid study | ~1.5 min |
+| `python reproduce.py verify-all` | release gate: deep checks plus all five ensemble studies, re-run and compared | ~4 min |
+
+Allow longer on older hardware.
 
 Run `python reproduce.py` with no target to display every available command.
 
@@ -154,7 +165,13 @@ comparisons. They can be copied and edited for new studies.
 
 ## Citation
 
-Version 1.0.0 is archived on Zenodo:
+Please cite the paper:
+
+> S. Abkin and P. Daripa, *On the Accuracy of Gradient Random Walk Methods
+> for the Heat, FitzHugh–Nagumo, and Burgers' Equations*, arXiv preprint
+> [arXiv:2608.22592](https://doi.org/10.48550/arXiv.2608.22592), 2026.
+
+Version 1.0.0 of this software is archived on Zenodo:
 [https://doi.org/10.5281/zenodo.22050659](https://doi.org/10.5281/zenodo.22050659).
 See `CITATION.cff` for complete citation metadata.
 

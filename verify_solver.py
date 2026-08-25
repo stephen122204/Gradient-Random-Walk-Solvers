@@ -2,10 +2,10 @@
 """
 verify_solver.py
 ================
-Verification and benchmark comparison for the GRW solver suite.
+Verification and reference comparison for the GRW solver suite.
 
 For each equation the script runs the primary solver and compares output against
-a trusted benchmark:
+a trusted reference:
 
   heat -- exact analytical solution (error function), valid for step IC.
              Primary solver: direct GRW.
@@ -18,8 +18,11 @@ a trusted benchmark:
              Reference: exact solution u = 1/(1+exp(-(x+theta*t)/2)).
 
 Burgers and FHN comparisons label exact vs reference solutions explicitly.
-The purpose of the error metrics on main is to quantify GRW feasibility and
-limitations, not to advertise accuracy.
+The purpose of these error metrics is to quantify GRW feasibility and
+limitations, not to advertise accuracy. They are single-run exploratory
+checks; the paper's reported errors come from the pinned studies
+(reproduce.py). Exact profiles: `eq:heat-exact`, `eq:fhn-exact`,
+`eq:burgers-shock` (arXiv:2608.22592).
 
 Usage examples:
   python verify_solver.py # run all three
@@ -139,7 +142,7 @@ def exact_burgers_stationary_shock(x, nu, x_center=None, amplitude=1.0):
     The Cole-Hopf phi0 for this IC satisfies phi0(0) = phi0(L) whenever xc = L/2
     and the domain is symmetric about xc, making the cumulative reconstruction in
     the GRW return exactly to its starting value -- a well-conditioned property for
-    the Cole-Hopf GRW benchmark.
+    the Cole-Hopf GRW test problem.
 
     :param x: array of spatial positions
     :param nu: kinematic viscosity
@@ -285,7 +288,7 @@ def save_npz(x, numerical, reference, path):
 
 
 # ---------------------------------------------------------------------------
-# Heat verification  (exact analytical benchmark)
+# Heat verification  (exact analytical reference)
 # ---------------------------------------------------------------------------
 
 def run_heat(cfg, output_dir, do_save_data):
@@ -372,7 +375,7 @@ def run_heat(cfg, output_dir, do_save_data):
 
 
 # ---------------------------------------------------------------------------
-# Burgers verification (Cole-Hopf GRW only, exact benchmarks)
+# Burgers verification (Cole-Hopf GRW only, exact references)
 # ---------------------------------------------------------------------------
 
 def _run_burgers_grw(cfg, diag_dir=None):
@@ -940,7 +943,7 @@ def _run_fhn_scalar(cfg, output_dir, do_save_data):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Verification and benchmark comparison for the GRW solver.",
+        description="Verification and reference comparison for the GRW solver.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "Examples:\n"

@@ -1,3 +1,18 @@
+"""Gradient random walk (GRW) solvers for the heat, FitzHugh--Nagumo, and
+Burgers' (Cole--Hopf) equations.
+
+Manuscript map (arXiv:2608.22592): Brownian displacement `sec:brownian`,
+cumulative reconstruction `sec:reconstruction`, boundary reflection
+`sec:boundary-reflection`, reaction-weight update `eq:reaction-weight-update`;
+the canonical problems are `sec:benchmarks`; the Burgers pipeline is Algorithm
+`alg:cole-hopf` with initialization `eq:cole-hopf-initialization` and recovery
+`eq:cole-hopf-recovery`.
+
+A "glob" (the paper's term) is one signed gradient carrier: a position plus a
+signed weight sampling u_x (phi_x for Burgers). Fields are recovered by
+sorting the globs and cumulatively summing their weights
+(`eq:cumulative-reconstruction`).
+"""
 import os
 
 import numpy as np
@@ -49,7 +64,8 @@ def random_walk(globs, diff_constant, time_step):
 
     The GRW method evolves globs representing the gradient-side computational elements.
     Each glob's position is updated by a Gaussian displacement with mean 0 and variance
-    2 * alpha * dt, i.e. sigma = sqrt(2 * alpha * dt).
+    2 * alpha * dt, i.e. sigma = sqrt(2 * alpha * dt). This is the Brownian
+    update `eq:brownian-update` (`sec:brownian`).
 
     Glob values (signed gradient weights) are not changed here; they are only modified by
     apply_boundary_conditions when a Neumann wall is crossed.
@@ -76,7 +92,8 @@ def random_walk(globs, diff_constant, time_step):
 
 def apply_boundary_conditions(globs, boundary_conditions, domain_size):
     """
-    Apply boundary conditions to heat globs after each Brownian step.
+    Apply boundary conditions to heat globs after each Brownian step
+    (manuscript `sec:boundary-reflection`).
 
     GRW boundary rules:
     - Dirichlet: symmetric reflection — reflect by the overshoot distance back into the domain.
@@ -109,7 +126,8 @@ def apply_boundary_conditions(globs, boundary_conditions, domain_size):
 
 def simulate_heat_equation(globs, config):
     """
-    Evolve heat globs forward in time using the GRW method.
+    Evolve heat globs forward in time using the GRW method
+    (Algorithm `alg:grw`; the step problem is `sec:heat-benchmark`).
 
     Each glob carries a position and a signed value representing its contribution to the
     gradient field u_x. The time loop applies:
@@ -134,7 +152,9 @@ def simulate_heat_equation(globs, config):
 
 def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
     """
-    Scalar GRW for the FitzHugh-Nagumo traveling front.
+    Scalar GRW for the FitzHugh-Nagumo traveling front
+    (manuscript `sec:fhn-benchmark`; reaction weight `eq:reaction-weight-update`;
+    exact front `eq:fhn-exact`).
 
     Scalar PDE:
       u_t = D * u_xx + f(u)
@@ -579,7 +599,9 @@ def _save_cole_hopf_diagnostics(
 
 def simulate_burgers_cole_hopf_grw(globs, config, _diag_dir=None):
     """
-    Burgers GRW via the Cole-Hopf transformation.
+    Burgers GRW via the Cole-Hopf transformation (manuscript
+    `sec:burgers-benchmark`; Algorithm `alg:cole-hopf`; initialization
+    `eq:cole-hopf-initialization`; recovery `eq:cole-hopf-recovery`).
 
     The Cole-Hopf transform u = -2*nu * phi_x / phi maps Burgers' equation
       u_t + u*u_x = nu*u_xx
@@ -722,7 +744,7 @@ def simulate_burgers_cole_hopf_grw(globs, config, _diag_dir=None):
     # sigma_bins=12 has a variance-effective sample size
     # 1/sum(kernel**2) ~ 43 bins, reducing shot noise by about sqrt(43)=6.5
     # while staying below the phi variation scale
-    # (shock width / dx_out >> 30 for well-resolved benchmarks).
+    # (shock width / dx_out >> 30 for well-resolved cases).
     #
     # Boundary-corrected smoothing: mode='same' convolution zero-pads outside
     # [0, N-1], which truncates the kernel near both domain edges.  The result
