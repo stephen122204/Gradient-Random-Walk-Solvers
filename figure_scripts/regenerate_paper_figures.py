@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Regenerate all eight GRW paper figures from checked-in data or fixed-seed (42) runs.
 
-Four of these are the combined paper's representative figures
+Four of these are the paper's representative figures
 (arXiv:2608.22592): heat_comparison `fig:heat-comparison`, fhn_comparison
 `fig:fhn-comparison`, fhn_diagnostics `fig:fhn-diagnostics`, and
 burgers_diagnostics `fig:burgers-diagnostics`. The `paper` target of

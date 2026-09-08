@@ -9,11 +9,10 @@ must never modify, any solver or study code.
 
 Targets
     python reproduce.py studies   # single-seed representative study data
-                                  # (seed 42; legacy diagnostics kept from the
-                                  # original verification study)
+                                  # (seed 42)
     python reproduce.py figures   # representative-figure set from archived
-                                  # arrays (legacy set; the combined paper's
-                                  # ten figures come from the `paper` target)
+                                  # arrays (the paper's ten figures come from
+                                  # the `paper` target)
     python reproduce.py all       # studies + figures (representative layer)
     python reproduce.py verify    # re-run studies, compare every reported value
                                   # against expected_values.json (PASS/FAIL)
@@ -230,7 +229,7 @@ def verify(deep: bool = False) -> int:
     dom_rows = _read_rows(DATA_DIR / "burgers_domain_sensitivity_summary.csv")
     prods = [float(r["bc_mismatch_RMSE"]) * math.sqrt(float(r["L"])) for r in dom_rows]
     for prod, want in zip(prods, derived["e_det_sqrtL_products"]):
-        check("E_det*sqrt(L) product (paper Sec 6.3)", prod, want)
+        check("E_det*sqrt(L) product (manuscript `sec:results-burgers`)", prod, want)
 
     check("kernel variance-effective bins (paper: ~43)",
           2 * 12 * math.sqrt(math.pi), derived["kernel_variance_effective_bins"])

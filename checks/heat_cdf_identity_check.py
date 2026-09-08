@@ -1,4 +1,5 @@
-"""Empirical-CDF identity checks for the paired heat study (manuscript Sec. 8.2).
+"""Empirical-CDF identity checks for the paired heat study (manuscript `sec:analysis-cdf`,
+`sec:heat-grid-paired`).
 
 Evaluates, with no solver runs:
   * the deterministic bin-and-sum control (bin-center and bin-edge floors),
@@ -9,7 +10,7 @@ and compares them with pinned_ensembles/heat_grid_paired/summary_by_N_paired.csv
 Run from the repository root:
     python checks/heat_cdf_identity_check.py [--fresh]
 Optional --fresh reruns a direct numpy re-implementation of the heat walk for independent seed blocks
-(this is a supplementary computation assessing variability across four retained seed blocks).
+(assesses seed-block variability of the spread; the pinned ensemble is not replaced).
 Square roots of exact second moments are RMS benchmarks, not exact expected norms.
 The squared-statistic variances use Gaussian quadratic-form approximations; standard
 deviations of norms then use a first-order delta approximation. No exact tail test is implied.
@@ -36,7 +37,7 @@ def ref_inf(x):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pinned", default=str(Path(__file__).resolve().parents[1] / "pinned_ensembles/heat_grid_paired/summary_by_N_paired.csv"))
-    ap.add_argument("--fresh", action="store_true", help="rerun the heat walk for independent seed blocks (new computation)")
+    ap.add_argument("--fresh", action="store_true", help="also run the heat walk for four independent seed blocks")
     a = ap.parse_args()
     print(f"NumPy {np.__version__}; exact second moments; Gaussian/delta SD approximations")
     print("RMS = sqrt(E[statistic**2]), not E[statistic]; approx_sd is not exact")

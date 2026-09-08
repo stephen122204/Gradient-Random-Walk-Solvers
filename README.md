@@ -129,23 +129,25 @@ Run `python reproduce.py` with no target to display every available command.
 
 ## Additional Checks
 
-Two standalone scripts in `checks/` verify specific parts of the code and the
-archived data. They are not `reproduce.py` targets; run them from the
-repository root.
+Two scripts in `checks/` evaluate the paper's analytical identities against the
+archived data and confirm that two solver entry points reproduce it. Run them
+from the repository root.
 
 | Command | What it covers | Wall clock |
 |---|---|---|
-| `python checks/heat_cdf_identity_check.py` | evaluates the deterministic bin-and-sum control, the empirical-CDF identity for the expected squared errors, the Gaussian/delta approximations to their sampling spread, and the paired identity, and compares them with `pinned_ensembles/heat_grid_paired/` (no solver runs) | <1 s |
-| `python checks/heat_cdf_identity_check.py --fresh` | additionally re-runs the heat walk for four independent seed blocks to assess seed-block variability | ~15 s |
-| `python checks/interface_regression_checks.py` | confirms the FitzHugh–Nagumo default path is unchanged by the optional `reaction_derivative` callback and that `utils.reconstruct_cumulative` reproduces the pinned paired-heat statistics | ~1 min |
+| `python checks/heat_cdf_identity_check.py` | the deterministic bin-and-sum control, the empirical-CDF identity for the expected squared errors, their Gaussian/delta sampling approximations, and the paired identity, compared with `pinned_ensembles/heat_grid_paired/` (no solver runs) | <1 s |
+| `python checks/heat_cdf_identity_check.py --fresh` | also runs the heat walk for four independent seed blocks to show seed-block variability of the spread | ~15 s |
+| `python checks/interface_regression_checks.py` | the `reaction_derivative` callback reproduces the default reaction–diffusion path exactly, and `utils.reconstruct_cumulative` reproduces the pinned paired-heat statistics | ~1 min |
 
-`interface_regression_checks.py --pristine DIR` also compares the default
-path against an earlier checkout at `DIR`.
+`interface_regression_checks.py --reference DIR` additionally compares the
+default path with another checkout of the code at `DIR`.
 
-## Run a Modified Case
+## Add Your Own Case
 
-Copy a JSON file from `configs/`, change its parameters, and pass it to the
-solver:
+Three levels of customization are available.
+
+**A new parameter set.** Copy a JSON file from `configs/`, edit it, and pass it
+to the solver:
 
 ```bash
 python main.py configs/heat_step_dirichlet.json
@@ -153,17 +155,30 @@ python main.py configs/fhn_grw_steady.json
 python main.py configs/burgers_stationary_shock.json
 ```
 
-`config_template.jsonc` documents the available fields. Custom comparison
-figures are saved below `outputs/`. When an exact solution is available, a
-modified case can also be checked with:
+`config_template.jsonc` documents every field. Figures are written below
+`outputs/`. When an exact solution is available, the run can be checked with:
 
 ```bash
 python verify_solver.py --equation heat --config configs/heat_step_dirichlet.json
 ```
 
-The files in `studies/` are complete examples of parameter sweeps, multi-seed
-experiments, error decompositions, bootstrap intervals, and controlled
-comparisons. They can be copied and edited for new studies.
+**A new scalar reaction law.** The reaction–diffusion solver evolves the
+gradient of `u_t = D u_xx + f(u)` and needs only `f'(u)`. Set
+`reaction_derivative` on the configuration to a function of a NumPy array;
+leaving it `None` selects the built-in Nagumo-type polynomial used in the paper.
+
+```python
+from config import SimulationConfig
+cfg = SimulationConfig(equation_type='fitzhugh-nagumo', ...)
+cfg.reaction_derivative = lambda u: 1.0 - 2.0 * u      # Fisher–KPP: f(u) = u(1 - u)
+```
+
+**A new study.** The files in `studies/` are complete examples of parameter
+sweeps, multi-seed ensembles, bias–spread decompositions, bootstrap intervals,
+and controlled comparisons. Copy one and edit its parameter block. To compare
+a binned cumulative reconstruction with a reference, use
+`utils.reconstruct_cumulative`, which returns the coordinates the
+reconstruction represents along with the values.
 
 ## Repository Layout
 
