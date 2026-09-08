@@ -2,12 +2,15 @@
 
 Evaluates, with no solver runs:
   * the deterministic bin-and-sum control (bin-center and bin-edge floors),
-  * E[E_total^2] = pred^2 + h*sum F(1-F)/N and the implied spread and bias expectations,
-  * the sampling sd of the 30-realization bias and spread from Cov(F_N(x),F_N(y)) = [F(min)-F(x)F(y)]/N,
+  * E[E_total^2] = pred^2 + h*sum F(1-F)/N and exact second moments of the spread and bias statistics,
+  * Gaussian/delta approximations to the sampling sd of the bias and spread, using Cov(F_N(x),F_N(y)) = [F(min)-F(x)F(y)]/N,
   * the paired identity ||b_c||^2 - ||b_e||^2 = ||d||^2 + 2<b_e,d>,
 and compares them with pinned_ensembles/heat_grid_paired/summary_by_N_paired.csv.
 Optional --fresh reruns a direct numpy re-implementation of the heat walk for independent seed blocks
-(this is a new computation, ~12 s, used only to test whether the large-N spread deviation is systematic).
+(this is a supplementary computation assessing variability across four retained seed blocks).
+Square roots of exact second moments are RMS benchmarks, not exact expected norms.
+The squared-statistic variances use Gaussian quadratic-form approximations; standard
+deviations of norms then use a first-order delta approximation. No exact tail test is implied.
 """
 import argparse, csv, sys
 from math import erf, sqrt
@@ -33,6 +36,8 @@ def main():
     ap.add_argument("--pinned", default=str(Path(__file__).resolve().parents[1] / "pinned_ensembles/heat_grid_paired/summary_by_N_paired.csv"))
     ap.add_argument("--fresh", action="store_true", help="rerun the heat walk for independent seed blocks (new computation)")
     a = ap.parse_args()
+    print(f"NumPy {np.__version__}; exact second moments; Gaussian/delta SD approximations")
+    print("RMS = sqrt(E[statistic**2]), not E[statistic]; approx_sd is not exact")
     rows = list(csv.DictReader(open(a.pinned)))
     for M in (300, 400):
         h = L / M; b = (np.arange(M) + 1) * h; c = (np.arange(M) + 0.5) * h
@@ -48,7 +53,7 @@ def main():
                 Etot = sqrt(pred2 + np.trace(A))
                 Esp2 = (S - 1) / S * np.trace(A); Vsp2 = (S - 1) / S ** 2 * 2 * np.sum(A * A)
                 C = A / S; Eb2 = pred2 + np.trace(C); Vb2 = 4 * h * (D @ C @ D) + 2 * np.sum(C * C)
-                print(f"  {conv:6s} N={N:6d} total meas={float(r['E_total']):.5f} pred={Etot:.5f} | spread meas={float(r['E_spread']):.5f} pred={sqrt(Esp2):.5f} relsd={0.5*sqrt(Vsp2)/Esp2:.3f} | bias meas={float(r['E_bias']):.5f} E={sqrt(Eb2):.5f} sd={sqrt(Vb2)/(2*sqrt(Eb2)):.5f}")
+                print(f"  {conv:6s} N={N:6d} total meas={float(r['E_total']):.5f} RMS={Etot:.5f} | spread meas={float(r['E_spread']):.5f} RMS={sqrt(Esp2):.5f} approx_relsd={0.5*sqrt(Vsp2)/Esp2:.3f} | bias meas={float(r['E_bias']):.5f} RMS={sqrt(Eb2):.5f} approx_sd={sqrt(Vb2)/(2*sqrt(Eb2)):.5f}")
         bc = [float(x["E_bias"]) for x in rows if x["treatment"] == f"fixed{M}" and x["N"] == "50000"][0]
         be = [float(x["E_bias"]) for x in rows if x["treatment"] == f"fixed{M}e" and x["N"] == "50000"][0]
         print(f"  paired identity at N=50000: sqrt(bc^2-be^2)={sqrt(bc**2-be**2):.5f}  ||d||={dn:.5f}  cross term={bc**2-be**2-dn**2:.3e}")
