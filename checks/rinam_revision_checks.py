@@ -50,11 +50,13 @@ def check_fhn(pristine):
     ident_cb = np.array_equal(new['x'], cb['x']) and np.array_equal(new['w'], cb['w'])
     print(f"(a) callback vs default identical: {ident_cb}  "
           f"max|dx|={np.max(np.abs(new['x']-cb['x'])):.3e} max|dw|={np.max(np.abs(new['w']-cb['w'])):.3e}")
+    assert ident_cb, 'Callback differs from default'
     if pristine:
         old = run_fhn(pristine, os.path.join(d, 'old.npz'))
         ident = np.array_equal(new['x'], old['x']) and np.array_equal(new['w'], old['w'])
         print(f"(a) pristine vs new identical: {ident}  "
               f"max|dx|={np.max(np.abs(new['x']-old['x'])):.3e} max|dw|={np.max(np.abs(new['w']-old['w'])):.3e}")
+        assert ident, 'Default differs from pristine source'
     print(f"(a) elapsed {time.perf_counter()-t0:.1f}s")
 
 def check_paired_heat(N_list=(5000, 50000)):
@@ -83,6 +85,7 @@ def check_paired_heat(N_list=(5000, 50000)):
             got = _decompose(u_arr, ref, dxM)[:3]
             row = pinned[(tr, N)]
             exp = [float(row['E_bias']), float(row['E_spread']), float(row['E_total'])]
+            assert all(abs(g-e) <= 5.01e-9 for g,e in zip(got,exp)), 'Paired heat differs beyond 8-decimal CSV rounding'
             rel = max(abs(g - e) / e for g, e in zip(got, exp))
             worst = max(worst, rel)
             print(f"(b) N={N} {tr:10s} got={['%.8f'%g for g in got]} pinned={['%.8f'%e for e in exp]} max_rel={rel:.2e}")
