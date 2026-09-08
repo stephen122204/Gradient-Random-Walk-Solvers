@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """verify_ensembles.py — run and verify the multi-seed ensemble studies.
 
-These are the studies behind the combined paper's ensemble, paired-grid, and
+These are the studies behind the paper's ensemble, paired-grid, and
 controlled-diagnosis sections:
 
     t4  heat thirty-seed bias--spread--total decomposition

@@ -1,15 +1,15 @@
-"""Regression checks for the reaction-derivative interface and the coordinate-aware
-cumulative reconstruction.
+"""Regression checks for the reaction-derivative callback and the cumulative
+reconstruction.
 
-(a) The FitzHugh-Nagumo default path is bit-identical before and after the
-    reaction-derivative interface was added, and an explicit callback equal to
-    the built-in polynomial gives identical output.
-(b) The coordinate-aware reconstruct_cumulative path reproduces the pinned
-    paired-heat statistics (fixed300 / fixed300e) for the requested N.
+(a) Passing the built-in Nagumo-type polynomial through ``config.reaction_derivative``
+    gives output bit-identical to the default scalar reaction-diffusion path.
+(b) ``utils.reconstruct_cumulative`` reproduces the pinned paired-heat statistics
+    (fixed300 / fixed300e in pinned_ensembles/heat_grid_paired/) for the requested N.
 
 Run from the repository root:
-    python checks/interface_regression_checks.py [--pristine DIR]
-where DIR is an optional checkout of the code before the interface was added.
+    python checks/interface_regression_checks.py [--reference DIR]
+where DIR is another checkout of this code whose default path is compared with
+the current one (positions and weights must match exactly).
 """
 import csv, os, subprocess, sys, tempfile, time
 import numpy as np
@@ -46,21 +46,21 @@ def run_fhn(repo, out, mode='default'):
     subprocess.run([sys.executable, path, repo, out, mode], check=True)
     return np.load(out)
 
-def check_fhn(pristine):
+def check_fhn(reference):
     t0 = time.perf_counter()
     d = tempfile.mkdtemp()
-    new = run_fhn(ROOT, os.path.join(d, 'new.npz'))
+    cur = run_fhn(ROOT, os.path.join(d, 'cur.npz'))
     cb = run_fhn(ROOT, os.path.join(d, 'cb.npz'), 'callback')
-    ident_cb = np.array_equal(new['x'], cb['x']) and np.array_equal(new['w'], cb['w'])
+    ident_cb = np.array_equal(cur['x'], cb['x']) and np.array_equal(cur['w'], cb['w'])
     print(f"(a) callback vs default identical: {ident_cb}  "
-          f"max|dx|={np.max(np.abs(new['x']-cb['x'])):.3e} max|dw|={np.max(np.abs(new['w']-cb['w'])):.3e}")
+          f"max|dx|={np.max(np.abs(cur['x']-cb['x'])):.3e} max|dw|={np.max(np.abs(cur['w']-cb['w'])):.3e}")
     assert ident_cb, 'Callback differs from default'
-    if pristine:
-        old = run_fhn(pristine, os.path.join(d, 'old.npz'))
-        ident = np.array_equal(new['x'], old['x']) and np.array_equal(new['w'], old['w'])
-        print(f"(a) pristine vs new identical: {ident}  "
-              f"max|dx|={np.max(np.abs(new['x']-old['x'])):.3e} max|dw|={np.max(np.abs(new['w']-old['w'])):.3e}")
-        assert ident, 'Default differs from pristine source'
+    if reference:
+        ref = run_fhn(reference, os.path.join(d, 'ref.npz'))
+        ident = np.array_equal(cur['x'], ref['x']) and np.array_equal(cur['w'], ref['w'])
+        print(f"(a) reference checkout vs current identical: {ident}  "
+              f"max|dx|={np.max(np.abs(cur['x']-ref['x'])):.3e} max|dw|={np.max(np.abs(cur['w']-ref['w'])):.3e}")
+        assert ident, 'Default path differs from the reference checkout'
     print(f"(a) elapsed {time.perf_counter()-t0:.1f}s")
 
 def check_paired_heat(N_list=(5000, 50000)):
@@ -97,8 +97,8 @@ def check_paired_heat(N_list=(5000, 50000)):
     print(f"(b) worst relative deviation from pinned CSV: {worst:.2e} (CSV has 8 decimals)")
 
 if __name__ == '__main__':
-    pristine = None
-    if '--pristine' in sys.argv:
-        pristine = sys.argv[sys.argv.index('--pristine') + 1]
-    check_fhn(pristine)
+    reference = None
+    if '--reference' in sys.argv:
+        reference = sys.argv[sys.argv.index('--reference') + 1]
+    check_fhn(reference)
     check_paired_heat()

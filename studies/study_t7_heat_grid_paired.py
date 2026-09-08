@@ -15,9 +15,8 @@ then reconstructed under five output-grid treatments:
               rng(303) fitted slopes/CIs reproduce t4's published values
               digit-for-digit)
   fixed300  : weights binned on a fixed 300-bin grid, cumulative sum, compared
-              with the exact profile at bin CENTERS (the convention of the
-              original Paper-1 diagnostic, retained under that label as the
-              diagnosed convention)
+              with the exact profile at bin CENTERS (the bin-center comparison
+              convention analyzed in the manuscript)
   fixed400  : the same with 400 bins
   fixed300e : the same 300-bin reconstruction compared with the exact profile
               at bin RIGHT EDGES (the aligned-evaluation correction: the

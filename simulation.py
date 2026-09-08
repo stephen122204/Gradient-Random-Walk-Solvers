@@ -193,7 +193,7 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
       callable u -> f'(u) (vectorized over numpy arrays) for another scalar
       reaction law of the class u_t = D u_xx + f(u), whose gradient obeys
       v_t = D v_xx + f'(u) v. When it is None or absent the built-in
-      polynomial R(u) above is used, so the default path is unchanged.
+      polynomial R(u) above is used.
 
     Initialization
       steady_solution IC: globs placed at inverted-logistic positions
