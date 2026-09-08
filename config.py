@@ -207,6 +207,7 @@ class SimulationConfig:
         heat_ic_type=None,
         heat_jump_position=None,
         heat_jump_height=None,
+        reaction_derivative=None,
     ):
         self.equation_type = equation_type
         self.domain_type = domain_type
@@ -235,6 +236,10 @@ class SimulationConfig:
         self.heat_ic_type = (heat_ic_type or "").strip().lower()
         self.heat_jump_position = float(heat_jump_position) if heat_jump_position is not None else None
         self.heat_jump_height = float(heat_jump_height) if heat_jump_height is not None else 1.0
+        # Optional reaction-derivative callback u -> f'(u) for the scalar
+        # reaction-diffusion solver (vectorized over numpy arrays). None selects
+        # the built-in Nagumo-type polynomial of the manuscript.
+        self.reaction_derivative = reaction_derivative
 
 
 # ---------------------------

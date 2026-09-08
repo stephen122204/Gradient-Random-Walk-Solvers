@@ -375,6 +375,21 @@ def _plot_burgers_field(results, cfg=None, out_dir="outputs"):
 # --------------------------------------------------------------------------- #
 # FHN helpers: reconstruction and multi-/single-panel figures
 # --------------------------------------------------------------------------- #
+def reconstruct_cumulative(positions, weights, edges, u_left):
+    """Bin-and-sum cumulative reconstruction with explicit evaluation coordinates.
+
+    Weights are binned on ``edges`` (``np.histogram`` semantics) and summed
+    cumulatively from the left state ``u_left``. The cumulative sum over bins
+    0..k counts every glob up to the right edge of bin k, so the returned
+    coordinates are ``edges[1:]``: that is where the reconstruction lives and
+    where a reference should be evaluated (manuscript `sec:heat-grid-paired`).
+    Returns ``(x_eval, u)``.
+    """
+    bin_w, _ = np.histogram(positions, bins=edges, weights=weights)
+    u = float(u_left) + np.cumsum(bin_w)
+    return np.asarray(edges[1:], dtype=float), u
+
+
 def _reconstruct_u_grid(xs_sorted, ws_sorted, x_grid):
     """Interpolate the sorted cumulative-weight sum onto a uniform output grid."""
     u_cum = np.cumsum(ws_sorted)
