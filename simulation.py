@@ -189,6 +189,12 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
         5. React: w_i += dt * R(u_i) * w_i
            where R(u) = -(3D/2)*u^2 + (3D/2 - theta)*u + (theta/2 - D/4).
 
+    Reaction-derivative interface: ``config.reaction_derivative`` may hold a
+      callable u -> f'(u) (vectorized over numpy arrays) for another scalar
+      reaction law of the class u_t = D u_xx + f(u), whose gradient obeys
+      v_t = D v_xx + f'(u) v. When it is None or absent the built-in
+      polynomial R(u) above is used, so the default path is unchanged.
+
     Initialization
       steady_solution IC: globs placed at inverted-logistic positions
         x_i = -2 * log(1/u_i - 1) + x_center, u_i = (i + 0.5) / N0
@@ -234,6 +240,7 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
     c2 = -1.5 * D
     c1 =  1.5 * D - theta
     c0 =  0.5 * theta - 0.25 * D
+    reaction_derivative = getattr(config, 'reaction_derivative', None)
 
     # Optional diagnostics setup.
     if _diag_dir is not None:
@@ -285,7 +292,10 @@ def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
         # R(u) = -(3D/2)*u^2 + (3D/2-theta)*u + (theta/2-D/4)
         # The continuous zero-integral balance is approximated by this finite
         # right sum; no renormalization is applied.
-        R = c2 * u_cum**2 + c1 * u_cum + c0
+        if reaction_derivative is None:
+            R = c2 * u_cum**2 + c1 * u_cum + c0
+        else:
+            R = np.asarray(reaction_derivative(u_cum), dtype=float)
         w += dt * R * w
 
         # Diagnostic: track front location and record snapshots.

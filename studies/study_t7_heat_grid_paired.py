@@ -58,6 +58,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import SimulationConfig
 from verify_solver import exact_heat_step
+from utils import reconstruct_cumulative
 
 OUT_BASE = 'output/final_prepublication_tests/heat_grid_paired'
 
@@ -277,10 +278,13 @@ def run_task7(N_seq=None, S=30, base_seed=42,
             runs['coupled'].append(u_coupled)
 
             for M in FIXED_BINS:
-                bin_w, _ = np.histogram(x_pos, bins=fixed[M]['edges'], weights=w_arr)
-                u_fixed = float(uL) + np.cumsum(bin_w)
-                runs[f'fixed{M}'].append(u_fixed)
-                runs[f'fixed{M}e'].append(u_fixed)  # same vector, different reference
+                # Coordinate-aware reconstruction: x_eval are the bin right
+                # edges, the coordinates the cumulative sum represents.
+                x_eval, u_fixed = reconstruct_cumulative(
+                    x_pos, w_arr, fixed[M]['edges'], uL)
+                assert np.array_equal(x_eval, fixed[M]['edges'][1:])
+                runs[f'fixed{M}'].append(u_fixed)   # diagnostic: compared at bin centers
+                runs[f'fixed{M}e'].append(u_fixed)  # same vector, compared at x_eval
 
             if (s_idx + 1) % 10 == 0:
                 print(f"    {s_idx+1}/{S} seeds done")
