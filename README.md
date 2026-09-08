@@ -127,6 +127,21 @@ Allow longer on older hardware.
 
 Run `python reproduce.py` with no target to display every available command.
 
+## Additional Checks
+
+Two standalone scripts in `checks/` verify specific parts of the code and the
+archived data. They are not `reproduce.py` targets; run them from the
+repository root.
+
+| Command | What it covers | Wall clock |
+|---|---|---|
+| `python checks/heat_cdf_identity_check.py` | evaluates the deterministic bin-and-sum control, the empirical-CDF identity for the expected squared errors, the Gaussian/delta approximations to their sampling spread, and the paired identity, and compares them with `pinned_ensembles/heat_grid_paired/` (no solver runs) | <1 s |
+| `python checks/heat_cdf_identity_check.py --fresh` | additionally re-runs the heat walk for four independent seed blocks to assess seed-block variability | ~15 s |
+| `python checks/interface_regression_checks.py` | confirms the FitzHugh–Nagumo default path is unchanged by the optional `reaction_derivative` callback and that `utils.reconstruct_cumulative` reproduces the pinned paired-heat statistics | ~1 min |
+
+`interface_regression_checks.py --pristine DIR` also compares the default
+path against an earlier checkout at `DIR`.
+
 ## Run a Modified Case
 
 Copy a JSON file from `configs/`, change its parameters, and pass it to the
@@ -161,6 +176,7 @@ comparisons. They can be copied and edited for new studies.
   behind the reported values and figures.
 - `figure_scripts/`: figure generation.
 - `tests/`: quick installation checks of core formulas and boundary operations.
+- `checks/`: standalone identity and regression checks (see Additional Checks).
 
 
 ## Citation

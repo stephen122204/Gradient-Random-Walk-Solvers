@@ -1,11 +1,15 @@
-"""Focused checks for the RINAM-revision code changes.
+"""Regression checks for the reaction-derivative interface and the coordinate-aware
+cumulative reconstruction.
 
-(a) FHN default path is bit-identical before/after the reaction-derivative
-    interface, and an explicit callback equal to the built-in polynomial gives
-    identical output.
+(a) The FitzHugh-Nagumo default path is bit-identical before and after the
+    reaction-derivative interface was added, and an explicit callback equal to
+    the built-in polynomial gives identical output.
 (b) The coordinate-aware reconstruct_cumulative path reproduces the pinned
     paired-heat statistics (fixed300 / fixed300e) for the requested N.
-Run from the repository root:  python checks/rinam_revision_checks.py [--pristine DIR]
+
+Run from the repository root:
+    python checks/interface_regression_checks.py [--pristine DIR]
+where DIR is an optional checkout of the code before the interface was added.
 """
 import csv, os, subprocess, sys, tempfile, time
 import numpy as np

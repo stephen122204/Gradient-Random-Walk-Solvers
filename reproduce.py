@@ -43,6 +43,9 @@ Targets
                                   # output/final_prepublication_tests/paper_figures/
                                   # with a SHA-256 provenance manifest
 
+Standalone checks that are not targets of this script live in checks/
+(see README, Additional Checks).
+
 All paper configurations are pinned inside study_paper_refinement.py,
 figure_scripts/regenerate_paper_figures.py (seed 42 throughout), and the
 studies/ scripts (fixed seed lists documented in each study). The JSON
