@@ -1,4 +1,4 @@
-"""Empirical-CDF identity checks for the paired heat study (manuscript Sec. 8.2, RINAM revision).
+"""Empirical-CDF identity checks for the paired heat study (manuscript Sec. 8.2).
 
 Evaluates, with no solver runs:
   * the deterministic bin-and-sum control (bin-center and bin-edge floors),
@@ -6,6 +6,8 @@ Evaluates, with no solver runs:
   * Gaussian/delta approximations to the sampling sd of the bias and spread, using Cov(F_N(x),F_N(y)) = [F(min)-F(x)F(y)]/N,
   * the paired identity ||b_c||^2 - ||b_e||^2 = ||d||^2 + 2<b_e,d>,
 and compares them with pinned_ensembles/heat_grid_paired/summary_by_N_paired.csv.
+Run from the repository root:
+    python checks/heat_cdf_identity_check.py [--fresh]
 Optional --fresh reruns a direct numpy re-implementation of the heat walk for independent seed blocks
 (this is a supplementary computation assessing variability across four retained seed blocks).
 Square roots of exact second moments are RMS benchmarks, not exact expected norms.
