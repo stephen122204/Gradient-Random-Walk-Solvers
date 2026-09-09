@@ -11,10 +11,7 @@ authors:
     given-names: Prabir
     affiliation: "Department of Mathematics, Texas A&M University"
     orcid: "https://orcid.org/0000-0002-8771-0149"
-version: 1.0.0
-date-released: 2026-08-21
-doi: 10.5281/zenodo.22050659
-url: "https://doi.org/10.5281/zenodo.22050659"
+version: 1.1.0
 repository-code: "https://github.com/stephen122204/Gradient-Random-Walk-Solvers"
 license: MIT
 preferred-citation:
