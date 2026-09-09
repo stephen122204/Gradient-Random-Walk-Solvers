@@ -1,22 +1,4 @@
-"""Three controls for the two-step heat prediction.
-
-(a) Reference control. Samples the exact final-time reflected distribution directly,
-    with no time stepping, and compares the resulting reconstruction mean with the
-    closed-form finite-interval solution m. This isolates the reference formula from
-    the solver.
-(b) Identity control. Verifies the weighted mean and variance, the expected squared error,
-    and the finite-ensemble factors against repeated direct sampling, so that the algebra is
-    checked separately from the solver.
-(c) Seed-block control. Repeats the solver ensemble on independent blocks of thirty
-    seeds at one particle count and records the deviation of the measured statistics
-    from the prediction, together with the alignment term whose sign is at issue.
-    The production ensembles reuse one seed list at every particle count, so their
-    deviations are correlated across counts and cannot show whether a systematic
-    effect is present.
-
-Run from the repository root:
-    python checks/two_step_reference_and_seed_blocks.py [--blocks K] [--N N]
-"""
+"""Reproduce the two-step direct-distribution, finite-ensemble, and six seed-block controls."""
 import argparse
 import os
 import sys

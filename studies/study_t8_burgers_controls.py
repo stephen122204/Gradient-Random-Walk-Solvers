@@ -1,40 +1,4 @@
-"""Controlled attribution for the Cole-Hopf Burgers pipeline (manuscript
-`sec:colehopf-diagnosis`, `tab:burgers-decoupled-design`,
-`fig:burgers-decoupled`, `fig:burgers-boundary-domain`,
-`fig:burgers-perturbation-response`, arXiv:2608.22592; reproduce target: t8).
-
-The paper's coupled refinement varies three numerical choices together: the number of
-phi_x globs, the output-grid size (M = N), and the physical smoothing
-bandwidth (the kernel standard deviation is fixed at 12 bins, so its physical
-width shrinks with the grid). This study decouples them, adds the missing
-deterministic boundary control, and turns the one-point perturbation
-experiment into a response curve.
-
-Parts
-  V  validation: the parameterized pipeline reproduces the packaged solver
-     bit-for-bit at the paper configuration (P=M=400, sigma_bins=12, seed 42)
-  A  particle refinement at fixed output grid and fixed physical bandwidth
-  B  output-grid refinement at fixed glob count and fixed physical bandwidth
-  C  bandwidth sweep at fixed glob count and output grid
-  D  deterministic boundary controls (no particles), for L in {4,6,8,10}:
-     pinned-endpoint FD solve (the pipeline's boundary model) versus an FD
-     solve with the exact time-scaled Dirichlet data phi0 * exp(nu k^2 t),
-     k = A/(2 nu), which the exact transformed solution satisfies; plus the
-     exact-phi-through-recovery control
-  E  perturbation response curve: additive noise of several amplitudes on the
-     exact normalized transformed field, many realizations each, with the
-     measured particle reconstruction error of phi marked for comparison
-  F  multi-seed domain study: the paper's N = 100 L design at L in {4,6,8,10}
-     with 30 seeds per domain (E_det is deterministic; E_GRW and E_total get
-     ensemble means and spreads)
-
-Error conventions: RMSE for the u-space decomposition (the paper's Burgers
-convention) with the L_h^2 value also recorded (norms differ by sqrt(h M)).
-phi-space errors are RMSE against the pinned-endpoint FD reference, which is
-the boundary model the pipeline itself enforces.
-
-Output: output/final_prepublication_tests/burgers_controls/
-"""
+"""Burgers initialization, boundary, domain, and perturbation controls under Cole–Hopf recovery."""
 import contextlib
 import csv
 import io

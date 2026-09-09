@@ -1,22 +1,5 @@
 #!/usr/bin/env python3
-"""
-study_paper_refinement.py
-
-Single-seed (seed 42) refinement and domain-sensitivity data behind the
-paper's representative sections (arXiv:2608.22592). Three sequential studies
-run to completion, writing all outputs to
-output/paper_refinement_original_grw/.
-
-Study 1 – Heat particle refinement (N convergence; `sec:heat-representative`)
-Study 2 – Scalar FHN traveling-wave refinement (N convergence;
-          `sec:fhn-representative`)
-Study 3 – Burgers Cole-Hopf domain sensitivity (L sweep; the domain-size
-          study `sec:results-burgers`, `tab:burgers-domain`)
-
-The committed copies of these summaries live in figure_data/ (the paper's
-data of record); `reproduce.py verify` re-runs this script and compares
-every reported field against expected_values.json.
-"""
+"""Run the representative refinement and domain studies with the paper parameters."""
 
 import sys
 import os

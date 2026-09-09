@@ -1,44 +1,5 @@
 #!/usr/bin/env python3
-"""
-verify_solver.py
-================
-Verification and reference comparison for the GRW solver suite.
-
-For each equation the script runs the primary solver and compares output against
-a trusted reference:
-
-  heat -- exact analytical solution (error function), valid for step IC.
-             Primary solver: direct GRW.
-
-  burgers -- Cole-Hopf GRW only. Comparison against exact stationary-shock or
-        traveling-wave solution. Supported ICs: stationary_shock, traveling_wave.
-
-  fhn -- exact traveling-wave solution (analytic, multi-time snapshots).
-             Primary solver: scalar GRW (simulate_fitzhugh_nagumo_grw).
-             Reference: exact solution u = 1/(1+exp(-(x+theta*t)/2)).
-
-Burgers and FHN comparisons label exact vs reference solutions explicitly.
-The purpose of these error metrics is to quantify GRW feasibility and
-limitations, not to advertise accuracy. They are single-run exploratory
-checks; the paper's reported errors come from the pinned studies
-(reproduce.py). Exact profiles: `eq:heat-exact`, `eq:fhn-exact`,
-`eq:burgers-shock` (arXiv:2608.22592).
-
-Usage examples:
-  python verify_solver.py # run all three
-  python verify_solver.py --equation heat
-  python verify_solver.py --equation burgers --config configs/burgers_stationary_shock.json
-  python verify_solver.py --equation burgers --config configs/burgers_traveling_wave.json
-  python verify_solver.py --equation burgers --config configs/burgers_shock.json
-  python verify_solver.py --equation fhn --output-dir output/fhn_check
-  python verify_solver.py --equation heat --save-data
-  python verify_solver.py --equation burgers --ref-factor 8
-
-Outputs per equation (written to --output-dir, default: output/verify/<equation>):
-  comparison_plot.png two-panel figure: numerical vs reference + pointwise error
-  metrics.json all computed error metrics and equation-specific diagnostics
-  comparison_data.npz (optional, with --save-data) x grid, solutions, error arrays
-"""
+"""Compare a configured solver run with its exact reference and save diagnostic plots."""
 
 import argparse
 import json

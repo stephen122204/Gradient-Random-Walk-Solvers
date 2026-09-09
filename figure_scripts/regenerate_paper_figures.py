@@ -1,30 +1,16 @@
 #!/usr/bin/env python3
-"""Regenerate all eight GRW paper figures from checked-in data or fixed-seed (42) runs.
+"""Generate representative and refinement figures from committed data.
 
-Four of these are the paper's representative figures
-(arXiv:2608.22592): heat_comparison `fig:heat-comparison`, fhn_comparison
-`fig:fhn-comparison`, fhn_diagnostics `fig:fhn-diagnostics`, and
-burgers_diagnostics `fig:burgers-diagnostics`. The `paper` target of
-reproduce.py copies them next to the six ensemble figures to assemble the
-paper's full ten-figure set.
-
-Figures 1, 3, 4, 6, 7 are drawn from the archived representative arrays in
-figure_data/representative_figure_arrays.npz (regenerable bit-for-bit with
---rerun under the pinned environment of requirements.txt). Figures 2, 5, 8
-are drawn from the checked-in study CSVs in figure_data/ (the paper's data
-of record). Outputs are written to outputs/<timestamp>/ together with
-figure_regeneration_metadata.json, which records the seed and the source of
-every figure using repository-relative paths.
-"""
+The paper target in reproduce.py selects four representative figures from
+this set and combines them with the ensemble and two-step figures."""
 
 from __future__ import annotations
 
 import csv
-import json
 import math
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 os.environ.setdefault("SOURCE_DATE_EPOCH", "1704067200")
@@ -56,9 +42,6 @@ from plot_style import (  # noqa: E402
 SEED = 42
 ARRAY_PATH = DATA_DIR / "representative_figure_arrays.npz"
 
-# Expected representative values for regression checking. These are the figures
-# reported in Table~\ref{tab:verification-summary}; the tolerance catches drift
-# from accidental changes to the pipeline while allowing platform-level noise.
 def exact_heat(x: np.ndarray, time: float, alpha: float, center: float) -> np.ndarray:
     scaled = (x - center) / (2.0 * math.sqrt(alpha * time))
     erf_values = np.array([math.erf(float(value)) for value in scaled])
@@ -558,79 +541,6 @@ def compute_metrics(arrays: dict[str, np.ndarray]) -> dict[str, object]:
     return {"heat": heat, "fhn": fhn, "burgers": burgers}
 
 
-def _repo_rel(path) -> str:
-    """Repository-relative POSIX path string for portable metadata."""
-    try:
-        return Path(path).resolve().relative_to(CODE_DIR).as_posix()
-    except ValueError:
-        return Path(path).name
-
-
-def write_metadata(generated: list[str], force: bool, arrays: dict[str, np.ndarray]) -> None:
-    """Record how the paper figures were produced (seed, sources, outputs).
-
-    All paths are repository-relative so the metadata is portable across
-    machines and checkouts.
-    """
-    timestamp = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
-    metadata = {
-        "generated_at": timestamp,
-        "generator": _repo_rel(__file__),
-        "shared_style": _repo_rel(SCRIPT_DIR / "plot_style.py"),
-        "representative_arrays": _repo_rel(DATA_DIR / "representative_figure_arrays.npz"),
-        "representative_arrays_regenerated": bool(force),
-        "seed": SEED,
-        "outputs": [_repo_rel(p) for p in generated],
-        "figures": {
-            "heat_comparison": {
-                "source": "archived representative arrays (fixed-seed direct Brownian GRW)",
-                "parameters": {"domain": [0, 10], "alpha": 0.1, "T": 0.5, "dt": 0.001, "N": 50000},
-                "seed": SEED,
-                "note": "main panel plus residual inset u_N - u_ex",
-            },
-            "heat_error_fixed_grid_diagnostic_final": {
-                "source": _repo_rel(CSV_DIR / "heat_refinement_summary.csv"),
-                "mode": "checked-in study CSV (paper data of record)",
-            },
-            "fhn_comparison": {
-                "source": "archived representative arrays (fixed-seed scalar-FHN GRW with saved snapshots)",
-                "parameters": {"domain": [0, 30], "a": 0.25, "D": 0.5, "T": 9, "dt": 0.01, "N": 500, "boundary": "Neumann sign-flip"},
-                "seed": SEED,
-            },
-            "fhn_diagnostics": {
-                "source": "same fixed-seed trajectory as fhn_comparison",
-                "reference": "empirically anchored initial crossing",
-                "seed": SEED,
-                "note": "weights panel includes a zero line so the two Neumann-negated weights are visible",
-            },
-            "fhn_error_vs_N_final": {
-                "source": _repo_rel(CSV_DIR / "fhn_refinement_summary.csv"),
-                "mode": "checked-in study CSV (paper data of record)",
-                "guide": "black dashed O(N^{-1/2}) reference guide, not a fitted exponent",
-            },
-            "burgers_comparison": {
-                "source": "archived representative arrays (fixed-seed Cole-Hopf GRW with saved pipeline arrays)",
-                "parameters": {"domain": [0, 4], "A": 1, "nu": 0.5, "T": 0.5, "dt": 0.005, "N": 400, "sigma_bins": 12},
-                "seed": SEED,
-                "clipped_bins": int(arrays["burgers_clipped"].sum()),
-            },
-            "burgers_diagnostics": {
-                "source": "same fixed-seed pipeline as burgers_comparison",
-                "panels": "(a) transformed field, (b) recovery ratio, (c) recovered field, (d) pointwise error components u_FD - u_ex and u_GRW - u_FD (RMSEs E_det and E_GRW)",
-                "seed": SEED,
-            },
-            "burgers_domain_sensitivity_final": {
-                "source": _repo_rel(CSV_DIR / "burgers_domain_sensitivity_summary.csv"),
-                "mode": "checked-in study CSV (paper data of record)",
-                "series": ["E_det", "E_GRW", "E_total"],
-                "particle_scaling": "N=100L (fixed particle density; does not isolate particle count)",
-            },
-        },
-    }
-    metadata_path = FIGURE_DIR / "figure_regeneration_metadata.json"
-    metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
-
-
 def main() -> None:
     global FIGURE_DIR
     force = "--rerun" in sys.argv
@@ -651,7 +561,6 @@ def main() -> None:
     plot_burgers_comparison(arrays, generated)
     plot_burgers_diagnostics(arrays, generated)
     plot_burgers_domain(generated)
-    write_metadata(generated, force, arrays)
     metrics = compute_metrics(arrays)
 
     print(f"\nFigures → {FIGURE_DIR}/")

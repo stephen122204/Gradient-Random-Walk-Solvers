@@ -1,27 +1,7 @@
-"""Sensitivity of the fitted-trend confidence intervals to how seeds are resampled.
+"""Reproduce the fitted-rate bootstrap comparison table.
 
-Every ensemble study reuses the same seed list at each parameter value. The
-earlier realization-level bootstrap resampled independently within each parameter
-value. The revised manuscript uses joint-by-seed intervals as primary. This
-check reports both schemes. Its REPORTED references preserve the earlier
-independent intervals for regression checking; JSON joint fields supply the
-current manuscript intervals. Joint resampling preserves seed grouping across
-all parameter values.
-
-Coverage
-  from pinned per-realization norms (no solver runs):
-    heat E_total(N)                          root mean square of per-realization L_h^2 errors
-    reaction profile, location, speed, aligned   means of per-realization errors
-    Burgers initialization-point refinement  mean particle RMSE versus P (log-log slope)
-    Burgers domain study                     mean total RMSE versus L (linear slope)
-  with --heat-profiles (reruns the paired heat ensemble, about two minutes):
-    heat total, spread, and bias slopes for the coupled, fixed-300 bin-center,
-    and fixed-300 right-edge treatments, from realization profiles. The rerun
-    is first verified against pinned_ensembles/heat_grid_paired/summary_by_N_paired.csv.
-
-Run from the repository root:
-    python checks/bootstrap_seed_grouping_check.py [--heat-profiles] [--json PATH]
-"""
+Joint-by-seed intervals are primary. REPORTED retains the earlier independent
+intervals. Use --heat-profiles to include the paired heat profile statistics."""
 import argparse
 import csv
 import json

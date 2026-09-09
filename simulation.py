@@ -1,18 +1,7 @@
-"""Gradient random walk (GRW) solvers for the heat, FitzHugh--Nagumo, and
-Burgers' (Cole--Hopf) equations.
+"""Gradient random walk solvers for heat, scalar reaction–diffusion, and Burgers.
 
-Manuscript map (arXiv:2608.22592): Brownian displacement `sec:brownian`,
-cumulative reconstruction `sec:reconstruction`, boundary reflection
-`sec:boundary-reflection`, reaction-weight update `eq:reaction-weight-update`;
-the canonical problems are `sec:benchmarks`; the Burgers pipeline is Algorithm
-`alg:cole-hopf` with initialization `eq:cole-hopf-initialization` and recovery
-`eq:cole-hopf-recovery`.
-
-A "glob" (the paper's term) is one signed gradient carrier: a position plus a
-signed weight sampling u_x (phi_x for Burgers). Fields are recovered by
-sorting the globs and cumulatively summing their weights
-(`eq:cumulative-reconstruction`).
-"""
+A glob carries a position and a signed gradient weight. Cumulative summation
+recovers the field, with Cole–Hopf recovery used for Burgers."""
 import os
 
 import numpy as np
@@ -151,65 +140,12 @@ def simulate_heat_equation(globs, config):
 
 
 def simulate_fitzhugh_nagumo_grw(globs, config, _diag_dir=None):
-    """
-    Scalar GRW for the FitzHugh-Nagumo traveling front
-    (manuscript `sec:fhn-benchmark`; reaction weight `eq:reaction-weight-update`;
-    exact front `eq:fhn-exact`).
+    """Evolve scalar reaction–diffusion particles and return their final positions and weights.
 
-    Scalar PDE:
-      u_t = D * u_xx + f(u)
-
-    Exact traveling-wave solution:
-      u(x, t) = 1 / (1 + exp(-(x + theta*t - x_center) / 2))
-      theta = sqrt(2) * (0.5 - a)
-
-    Reaction statistic R(u) = f'(u), derived by requiring the sigmoid above to
-    be an exact solution of the PDE. Substituting u = 1/(1+exp(-xi/2)) gives:
-
-      f(u) = u*(1-u) * [theta/2 - D*(1-2*u)/4]
-      R(u) = f'(u) = -(3D/2)*u^2 + (3D/2 - theta)*u + (theta/2 - D/4)
-
-    Key property: integral_0^1 R(u) du = f(1) - f(0) = 0. Thus the continuum
-    update has zero net contribution. The discrete right-sum approximation
-    need not conserve the total weight exactly, and no artificial per-step
-    renormalization is applied.
-
-    GRW gradient-side algorithm (globs represent pieces of u_x):
-      Each glob carries a position x_i and a signed weight w_i.
-      The field u(x) is reconstructed by sorting globs and taking a cumulative
-      sum of weights: u(x_n) = sum_{i: x_i <= x_n} w_i.
-
-      Per time step:
-        1. Brownian walk: x_i += Normal(0, sqrt(2 * D * dt))
-           The Brownian step uses variance 2 * D * dt.
-        2. Boundary reflection: Dirichlet (preserve weight) or
-                                Neumann (negate weight on crossing).
-        3. Sort globs by position.
-        4. Reconstruct: u_i = sum_{k=1}^{i} w_k (cumsum in sorted order).
-        5. React: w_i += dt * R(u_i) * w_i
-           where R(u) = -(3D/2)*u^2 + (3D/2 - theta)*u + (theta/2 - D/4).
-
-    Reaction-derivative interface: ``config.reaction_derivative`` may hold a
-      callable u -> f'(u) (vectorized over numpy arrays) for another scalar
-      reaction law of the class u_t = D u_xx + f(u), whose gradient obeys
-      v_t = D v_xx + f'(u) v. When it is None or absent the built-in
-      polynomial R(u) above is used.
-
-    Initialization
-      steady_solution IC: globs placed at inverted-logistic positions
-        x_i = -2 * log(1/u_i - 1) + x_center, u_i = (i + 0.5) / N0
-        with uniform weights w_i = 1 / N0.
-      discontinuous IC: all N0 globs at x=x_center, w_i = 1/N0.
-      nonsmooth IC: linear-ramp inverse, w_i = 1/N0.
-
-    :param globs: list of dicts with 'position' and scalar 'value' (= w_i)
-    :param config: SimulationConfig; diff_constant = D, a = wave-speed parameter,
-                      time_step = dt, total_time = T, domain_size = L,
-                      boundary_conditions used for position reflection.
-    :param _diag_dir: optional path; if set, saves a diagnostic figure with
-                      front-location vs time and per-snapshot weight profiles.
-    :return: updated globs with final sorted positions and weights
-    """
+    Reconstruct the field after diffusion and reflection, then update weights.
+    config.reaction_derivative optionally supplies a vectorized reaction derivative;
+    the default is the paper's FitzHugh–Nagumo-type cubic. Weights are not
+    renormalized. _diag_dir optionally saves front and weight diagnostics."""
     D = config.diff_constant
     a_ = config.a if config.a is not None else 0.25
     dt = config.time_step
@@ -450,30 +386,10 @@ def _save_cole_hopf_diagnostics(
     u_ref=None, phi_exact=None, phi_x_over_phi_exact=None,
     phi_ref_fd=None,
 ):
-    """
-    Save a 2x3 diagnostic figure that decomposes the Cole-Hopf GRW error.
+    """Plot Cole–Hopf initialization, reconstruction, and recovery errors.
 
-    Three curves where available:
-      exact_shape -- phi0(x) = cosh(...)/cosh(...); equals the infinite-domain
-                      exact phi(x,T)/C(T). Shape is preserved on R.
-      FD reference -- phi(x,T) from a deterministic heat FD solve using the same
-                      prescribed endpoint data as the GRW (phi=phi0_0 at x=0,
-                      phi=phi0_L at x=L), with both endpoints held fixed.
-      GRW -- stochastic Monte-Carlo reconstruction.
-
-    Error decomposition:
-      deterministic component = FD_ref - exact_shape (dominant: finite-domain effect)
-      GRW reconstruction component = GRW - FD_ref (binning, smoothing, endpoint
-          enforcement, and particle noise)
-
-    Layout:
-      [0,0] phi0(x): GRW init vs exact shape
-      [0,1] phi(x,T): GRW vs FD_ref vs exact_shape
-      [0,2] phi_x/phi: GRW vs FD_ref vs exact
-      [1,0] phi_x(T): gradient vs bins vs FD_ref vs exact
-      [1,1] u(x,T): GRW vs FD_ref u vs exact
-      [1,2] Error decomposition: total / deterministic / GRW reconstruction
-    """
+    Compare particles with the fixed-endpoint deterministic reference and the
+    exact infinite-line shape."""
     import matplotlib.pyplot as plt
 
     os.makedirs(diag_dir, exist_ok=True)
@@ -608,66 +524,12 @@ def _save_cole_hopf_diagnostics(
 
 
 def simulate_burgers_cole_hopf_grw(globs, config, _diag_dir=None):
-    """
-    Burgers GRW via the Cole-Hopf transformation (manuscript
-    `sec:burgers-benchmark`; Algorithm `alg:cole-hopf`; initialization
-    `eq:cole-hopf-initialization`; recovery `eq:cole-hopf-recovery`).
+    """Evolve Burgers data by the Cole–Hopf GRW algorithm in the paper.
 
-    The Cole-Hopf transform u = -2*nu * phi_x / phi maps Burgers' equation
-      u_t + u*u_x = nu*u_xx
-    into the heat equation for phi:
-      phi_t = nu*phi_xx
-
-    The GRW method therefore reduces to the heat-equation machinery: a Brownian
-    random walk of phi_x globs with step sigma = sqrt(2*nu*dt).
-
-    Initialization:
-      Given u0(x), compute Psi0(x) = integral_0^x u0(s) ds (trapezoidal rule),
-      then phi0(x) = exp(-Psi0(x) / (2*nu)), normalized so phi0_max = 1.
-      Each phi_x glob is initialized at midpoint x_{i+1/2} with weight
-        w_i = phi0(x_{i+1}) - phi0(x_i)
-      so sum(weights) = phi0(L) - phi0(0) exactly.
-
-    Evolution:
-      Brownian random walk followed by Dirichlet (weight-preserving, position-
-      mirroring) boundary reflection. Weight-preserving reflection gives zero
-      flux for the phi_x density at the walls, i.e. phi_xx = 0 there; through
-      the heat equation phi_t = nu*phi_xx this holds the endpoint values of
-      phi fixed (constant Dirichlet endpoints, as in _reference_phi_heat_fd).
-      The domain should be large relative to the diffusion length
-      sqrt(2*nu*T) to minimize wall artifacts on the interior solution.
-
-    Reconstruction at final time T:
-      1. Bin glob weights onto a uniform N-point output grid.
-      2. Smooth with a boundary-corrected Gaussian kernel (sigma_bins=12).
-         The kernel is divided by its effective support at each bin so that
-         truncation at x=0 and x=L does not bias the phi_x amplitude near the
-         boundaries (previously the standard mode='same' convolution
-         underestimated |phi_x| there by up to ~2x for sigma_bins=12).
-         sigma_bins=12 averages a variance-effective ~43 bins (1/sum(k^2)),
-         reducing shot noise by a factor of ~6.5 while remaining narrow
-         relative to the phi variation scale.
-      3. Enforce the correct total for the smoothed bins:
-           - Symmetric IC (phi0(L)=phi0(0), exact_integral=0):
-             subtract the mean of bin_sums_s to enforce zero total exactly.
-             Gaussian convolution with mode='same' truncates the kernel near
-             both edges, causing the smoothed sum to drift away from zero.
-             Without this correction phi_out[-1] = phi0(0) + (non-zero sum)
-             != phi0(L), producing domain-wide systematic drift.
-           - Asymmetric IC (phi0(L)!=phi0(0)):
-             proportional rescale so sum(bin_sums_s) = phi0(L) - phi0(0).
-      4. phi(x_j) = phi0(0) + cumsum(smoothed_bins)
-      5. phi_x(x_j) = d(phi)/dx [np.gradient of the reconstructed phi]
-         Using the derivative of phi rather than bin_sums/dx ensures phi and
-         phi_x are derived from the same smooth curve, so their ratio is
-         self-consistent.
-      6. u(x_j) = -2*nu * phi_x(x_j) / phi(x_j) [single inverse-transform]
-
-    :param globs: list of dicts 'position' and 'value' = [u_i] on a uniform grid
-    :param config: SimulationConfig; diff_constant = nu, BCs used for phi_x walk
-    :param _diag_dir: optional path; if set, saves intermediate diagnostic plots
-    :return: updated globs with final u(x,T) on a uniform output grid
-    """
+    Input globs store field values as one-element lists. The transformed gradient
+    undergoes weight-preserving reflection. Reconstruction smooths the bins and
+    enforces the original fixed transformed endpoints before recovering velocity.
+    Return the updated field globs; _diag_dir optionally saves diagnostic plots."""
     nu = config.diff_constant
     dt = config.time_step
     L = config.domain_size
