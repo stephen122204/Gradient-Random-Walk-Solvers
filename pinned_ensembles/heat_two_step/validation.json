@@ -1,0 +1,185 @@
+{
+ "spec": {
+  "purpose": "held-out accuracy-target demonstration, specified before any validation run",
+  "reference": "infinite-line (the reference a user would normally have)",
+  "M": 200,
+  "target_rms_error": 0.008,
+  "center_convention": {
+   "B": 0.00940232440242561,
+   "attainable": false
+  },
+  "edge_convention": {
+   "B": 0.006991089044976126,
+   "attainable": true,
+   "N_required": 29682,
+   "predicted_E_total_at_N": 0.007999947661136347
+  },
+  "predicted_E_total_center_at_same_N": 0.010174848436934274,
+  "N": 29682,
+  "seeds": "7000-7029",
+  "criterion": "measured RMS realization error (E_total) against the infinite-line reference at the bin edges compared with eps and with the predicted value; center convention reported at the same N"
+ },
+ "rows": [
+  {
+   "N": 29682,
+   "M": 50,
+   "reference": "finite",
+   "convention": "edge",
+   "E_bias": 0.0011528392870733834,
+   "E_spread": 0.003909097246046196,
+   "E_total": 0.00407554655241056,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 50,
+   "reference": "finite",
+   "convention": "center",
+   "E_bias": 0.023531023253968435,
+   "E_spread": 0.003909097246046196,
+   "E_total": 0.02385351329799957,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 50,
+   "reference": "infinite",
+   "convention": "edge",
+   "E_bias": 0.007601654180911134,
+   "E_spread": 0.003909097246046196,
+   "E_total": 0.00854787620202862,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 50,
+   "reference": "infinite",
+   "convention": "center",
+   "E_bias": 0.025276060593467715,
+   "E_spread": 0.003909097246046196,
+   "E_total": 0.025576557242985,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 100,
+   "reference": "finite",
+   "convention": "edge",
+   "E_bias": 0.0011636209548615342,
+   "E_spread": 0.003914211836851793,
+   "E_total": 0.004083511727709778,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 100,
+   "reference": "finite",
+   "convention": "center",
+   "E_bias": 0.012274421525914733,
+   "E_spread": 0.003914211836851793,
+   "E_total": 0.012883418727169652,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 100,
+   "reference": "infinite",
+   "convention": "edge",
+   "E_bias": 0.0072374699817601505,
+   "E_spread": 0.003914211836851793,
+   "E_total": 0.00822812409001147,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 100,
+   "reference": "infinite",
+   "convention": "center",
+   "E_bias": 0.014724206606576258,
+   "E_spread": 0.003914211836851793,
+   "E_total": 0.015235593670641399,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 200,
+   "reference": "finite",
+   "convention": "edge",
+   "E_bias": 0.0011677374843299902,
+   "E_spread": 0.003913017119430347,
+   "E_total": 0.004083541821662174,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 200,
+   "reference": "finite",
+   "convention": "center",
+   "E_bias": 0.006651411675863523,
+   "E_spread": 0.003913017119430347,
+   "E_total": 0.00771705774623763,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 200,
+   "reference": "infinite",
+   "convention": "edge",
+   "E_bias": 0.007058008243096348,
+   "E_spread": 0.003913017119430347,
+   "E_total": 0.00807014146942713,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 200,
+   "reference": "infinite",
+   "convention": "center",
+   "E_bias": 0.010021934272642839,
+   "E_spread": 0.003913017119430347,
+   "E_total": 0.010758757806648624,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 400,
+   "reference": "finite",
+   "convention": "edge",
+   "E_bias": 0.0011663757532014486,
+   "E_spread": 0.003914545035759931,
+   "E_total": 0.00408461690182184,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 400,
+   "reference": "finite",
+   "convention": "center",
+   "E_bias": 0.0038526024939385373,
+   "E_spread": 0.003914545035759931,
+   "E_total": 0.005492377337118488,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 400,
+   "reference": "infinite",
+   "convention": "edge",
+   "E_bias": 0.006971231873534698,
+   "E_spread": 0.003914545035759931,
+   "E_total": 0.007995107045660829,
+   "S": 30
+  },
+  {
+   "N": 29682,
+   "M": 400,
+   "reference": "infinite",
+   "convention": "center",
+   "E_bias": 0.00812402084607526,
+   "E_spread": 0.003914545035759931,
+   "E_total": 0.00901794752393546,
+   "S": 30
+  }
+ ],
+ "mean_run_s": 1.0430667861015537
+}
