@@ -1,0 +1,20 @@
+{
+ "purpose": "held-out accuracy-target demonstration, specified before any validation run",
+ "reference": "infinite-line (the reference a user would normally have)",
+ "M": 200,
+ "target_rms_error": 0.008,
+ "center_convention": {
+  "B": 0.00940232440242561,
+  "attainable": false
+ },
+ "edge_convention": {
+  "B": 0.006991089044976126,
+  "attainable": true,
+  "N_required": 29682,
+  "predicted_E_total_at_N": 0.007999947661136347
+ },
+ "predicted_E_total_center_at_same_N": 0.010174848436934274,
+ "N": 29682,
+ "seeds": "7000-7029",
+ "criterion": "measured RMS realization error (E_total) against the infinite-line reference at the bin edges compared with eps and with the predicted value; center convention reported at the same N"
+}
