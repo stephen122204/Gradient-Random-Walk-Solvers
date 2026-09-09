@@ -578,15 +578,16 @@ def main():
 
     print(f"\n  Total wall time: {wall:.1f}s")
 
-    # Paper-claim assessment
-    print("\n  Paper-claim assessment:")
+    # Observed trends for this fixed single-seed study
+    print("\n  Observed trends over the tested range:")
     if -0.7 <= slope1 <= -0.3:
-        print("    [PASS] Heat GRW converges at O(N^{-1/2}) rate.")
+        print(f"    Heat fitted exponent {slope1:.3f} is near the sampling reference -0.5.")
     else:
-        print(f"   [NOTE] Heat slope {slope1:.3f} deviates from -0.5; "
-              f"check particle count range or dt.")
+        print(f"    Heat fitted exponent {slope1:.3f}; the error-attribution studies "
+              "separate sampling, reconstruction, and reference effects.")
     if -0.7 <= slope2 <= -0.3:
-        print("    [PASS] Scalar FHN GRW converges at O(N^{-1/2}) rate.")
+        print(f"    Scalar reaction-front fitted exponent {slope2:.3f} is near "
+              "the sampling reference -0.5.")
     else:
         print(f"   [NOTE] FHN slope {slope2:.3f} deviates from -0.5.")
     bc_dom = all(r['bc_mismatch_RMSE'] > r['grw_particle_RMSE'] for r in rows3)

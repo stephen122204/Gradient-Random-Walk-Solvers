@@ -110,3 +110,24 @@ Historical design records are in `provenance/heat_two_step/`. A rerun writes a
 new output directory and preserves the pinned data and original records. The
 new outputs reproduce a previously selected design; their timestamps do not
 constitute new prospective validation.
+
+## Editing and reproduction conventions
+
+Keep solver formulas in `simulation.py`, initial data and configuration handling
+in `config.py`, and reconstruction/plot helpers in `utils.py`. A study script
+should state its mathematical reference, parameters, seeds, output destination,
+and comparison statistic before its runner. Use ordinary functions, descriptive
+comments and docstrings, and one statement per line. Preserve numerical
+operation order and random-number consumption during editorial refactors.
+
+Command-line parsing and file/figure generation belong under a `main` entry
+point so importing an analysis module does not run it. Use explicit input/output
+paths, close files after reading or writing, and keep the committed reference
+data separate from fresh runs. The two-step study rejects odd or undersized
+particle counts because its fixed allocation requires two equal-sized groups.
+
+The four heat-extension and bootstrap scripts received this formatting pass.
+The earlier solver code retains its established layout. `README.md` documents
+output replacement, interrupted-run recovery, seed pairing, and custom-case
+limits. The usual `verify-all` command covers numerical reruns; the analytical,
+bootstrap and interface commands remain separately listed.
