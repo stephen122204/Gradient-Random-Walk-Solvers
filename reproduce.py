@@ -55,13 +55,15 @@ configs under configs/ and main.py are interactive exploration tools; they
 are not the source of the paper's numbers.
 
 Numerical tolerances
-    Float comparisons use rel/abs tolerance 1e-12. Under the pinned
+    The representative checks use rel/abs float tolerance 1e-12. Under the pinned
     environment in requirements.txt the regeneration is bit-identical; under
     other NumPy/BLAS builds, last-digit floating-point noise up to about
     2.4e-14 relative has been observed. The 1e-12 tolerance sits well above
     that platform noise and many orders of magnitude below the precision at
-    which any value is reported in the paper, so a genuine change in any
-    paper value cannot pass. Integers, row counts, seeds, and identifiers
+    which any value is reported in the paper. Differences at that precision
+    therefore fail these representative checks.
+    The ensemble and two-step comparators use rel 1e-9 / abs 1e-12,
+    as specified in their modules. Integers, row counts, seeds, and identifiers
     are always compared exactly.
 """
 

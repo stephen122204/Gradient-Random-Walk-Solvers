@@ -17,28 +17,22 @@ The repository supports two uses:
 
 ## Install
 
-**For the revised paper, use this updated checkout or the updated submission
-supplement.** The original Zenodo 1.0.0 archive predates the two-step predictive
-extension. A new archive version has not yet been deposited.
-
-
-For the archived version 1.0.0 release, download and extract the ZIP from
-[Zenodo](https://doi.org/10.5281/zenodo.22050659), then open a terminal in the
-extracted directory:
+Use the current branch for the revised paper:
 
 ```bash
-cd Gradient-Random-Walk-Solvers-1.0.0
-```
-
-Alternatively, clone the development repository:
-
-```bash
-git clone https://github.com/stephen122204/Gradient-Random-Walk-Solvers.git
+git clone --branch grw-solvers-v3 https://github.com/stephen122204/Gradient-Random-Walk-Solvers.git
 cd Gradient-Random-Walk-Solvers
-git checkout grw-solvers-v3
 ```
 
-Create a Python 3.11 environment:
+If you downloaded the updated submission supplement instead, extract it and
+open a terminal inside its `source/` directory. The commands below work from
+that directory as well.
+
+The original [Zenodo 1.0.0 archive](https://doi.org/10.5281/zenodo.22050659)
+supports the original paper. The two-step predictive extension requires this
+updated checkout or supplement. A new archive version has not yet been deposited.
+
+Check that `python --version` reports Python 3.11, then create an environment:
 
 ```bash
 python -m venv .venv
@@ -97,7 +91,7 @@ python reproduce.py ensembles
 ```
 
 The individual ensemble targets are `t4` (heat), `t7` (paired heat-grid
-control), `t5` (FitzHugh–Nagumo), `t3` (Cole–Hopf plateau controls), and
+control), `t5` (scalar reaction–diffusion), `t3` (Cole–Hopf plateau controls), and
 `t8` (controlled Burgers attribution). For example:
 
 ```bash
@@ -160,7 +154,7 @@ Measured wall-clock times (Apple-Silicon laptop, pinned environment):
 | `python reproduce.py verify --deep` | single-seed studies plus archived representative arrays (179 checks) | ~17 s |
 | `python reproduce.py t3` | Cole–Hopf plateau controls | ~2 s |
 | `python reproduce.py t8` | controlled Burgers attribution | ~4 s |
-| `python reproduce.py t5` | FitzHugh–Nagumo thirty-seed ensemble | ~15 s |
+| `python reproduce.py t5` | scalar reaction–diffusion thirty-seed ensemble | ~15 s |
 | `python reproduce.py t4` | heat thirty-seed ensemble | ~1.5 min |
 | `python reproduce.py t7` | paired heat output-grid study | ~1.5 min |
 | `python reproduce.py verify-all` | deep checks, five original ensemble studies, and two-step heat, re-run and compared | several minutes; hardware dependent |
@@ -188,18 +182,62 @@ python checks/two_step_reference_and_seed_blocks.py
 python checks/bootstrap_seed_grouping_check.py --heat-profiles --json output/bootstrap-seed-grouping.json
 ```
 
-The first reproduces the direct-distribution controls and six independent seed
-blocks. Its default reference control uses 20 million samples and can use
+The first reproduces the direct-distribution and finite-ensemble moment controls
+and six independent seed blocks. Its default reference control uses 20 million samples and can use
 substantial memory. The second reproduces the bootstrap comparison table,
-including heat profile statistics. The manuscript uses joint-by-seed intervals
+including heat profile statistics, and creates the requested JSON parent directory. The manuscript uses joint-by-seed intervals
 as primary. Both scripts print their results, and the second also writes JSON.
 
 `interface_regression_checks.py --reference DIR` additionally compares the
 default path with another checkout of the code at `DIR`.
 
+## Outputs, Interrupted Runs, and Random Seeds
+
+Paper studies use fixed output names. Rerunning a target replaces its generated
+files. The `paper` target recreates its figure directory from committed inputs.
+The pinned inputs in `figure_data/`, `pinned_ensembles/`, and `provenance/` remain
+unchanged during the usual reproduction commands.
+
+| Run | Destination and overwrite behavior |
+|---|---|
+| `studies` or `verify` | `output/paper_refinement_original_grw/`; fixed study files |
+| `t3`, `t4`, `t5`, `t7`, `t8` or `verify-ensembles` | One directory per study under `output/final_prepublication_tests/` |
+| `paper` | Recreates `output/final_prepublication_tests/paper_figures/` |
+| `verify-two-step` or `t9` | `output/heat_two_step_reproduction/`; fixed prediction and ensemble files |
+| Direct two-step script | `output/heat_two_step/` by default, or `--output-dir PATH` |
+| `main.py CONFIG` | Plots in `outputs/YYYY-MM-DD_HH-MM-SS/`; the folder identifies the run time, not its parameters |
+
+There is no checkpoint resume within an ensemble. After an interruption, rerun
+the affected study. Completed original studies can be checked together without
+rerunning them using `python reproduce.py verify-ensembles --no-rerun`.
+For the two-step study, if `predict` finished, rerun the interrupted `run` or
+`validate` stage with the same output directory. Once all stages finish,
+`python reproduce.py verify-two-step --no-rerun` checks the standard reproduction
+directory. A failed or interrupted command does not establish a completed check.
+
+Each study fixes its seed list and reuses it across refinement levels. Changing
+the particle count can change how draws are assigned to particles, so seed reuse
+is not the same as identical trajectories. Paired heat reconstructions reuse the
+same final particle set across comparison points and references. The two-step
+production uses seeds 5000–5029, validation uses 7000–7029, and the six additional
+blocks use separate seed ranges. The manuscript's primary bootstrap resamples
+jointly by seed across refinement levels. Historical study outputs retain their
+earlier intervals; `bootstrap_seed_grouping_check.py` produces the current
+`joint` intervals and the comparison table.
+
+The exploratory `main.py` command does not set a seed. To make a custom run
+repeatable, set NumPy's seed before calling a solver and save the configuration
+with the results. Matching a seed alone does not pair runs of different equations
+or guarantee matching particle trajectories after changing the design.
+
 ## Add Your Own Case
 
-Three levels of customization are available.
+Three levels of customization are available. Pinned verification checks apply
+to the published configuration. Changing physical parameters, particle counts,
+seeds, or reconstruction conventions changes the expected results and requires
+new figures and summaries for that case. Keep custom outputs in a separate
+directory. Study filenames do not automatically encode modified parameters.
+Larger particle counts, more seeds, or more time steps increase the work.
 
 **A new parameter set.** Copy a JSON file from `configs/`, edit it, and pass it
 to the solver:
@@ -211,7 +249,9 @@ python main.py configs/burgers_stationary_shock.json
 ```
 
 `config_template.jsonc` documents every field. Figures are written below
-`outputs/`. When an exact solution is available, the run can be checked with:
+`outputs/`. Save your edited configuration with the output because the timestamp
+folder does not record the parameter values. When an exact solution is
+available, the run can be checked with:
 
 ```bash
 python verify_solver.py --equation heat --config configs/heat_step_dirichlet.json
@@ -233,7 +273,9 @@ cfg.reaction_derivative = lambda u: 1.0 - 2.0 * u      # Fisher–KPP: f(u) = u(
 
 **A new study.** The files in `studies/` are complete examples of parameter
 sweeps, multi-seed ensembles, bias–spread decompositions, bootstrap intervals,
-and controlled comparisons. Copy one and edit its parameter block. To compare
+and controlled comparisons. Copy one and edit its parameter block and output
+destination. The two-step study requires an even particle count of at least
+two for its equal group allocation. To compare
 a binned cumulative reconstruction with a reference, use
 `utils.reconstruct_cumulative`, which returns the coordinates the
 reconstruction represents along with the values.
@@ -252,7 +294,6 @@ reconstruction represents along with the values.
 - `checks/`: identity, bootstrap, interface, and two-step reproduction checks.
 - `docs/METHODS_AND_REPRODUCIBILITY.md`: mathematical sources and paper-to-command map.
 - `provenance/heat_two_step/`: preserved original design hashes and production log.
-
 
 ## Build a Reproduction Package
 
@@ -274,7 +315,8 @@ The original preprint citation is:
 
 Version 1.0.0 of this software is archived on Zenodo:
 [https://doi.org/10.5281/zenodo.22050659](https://doi.org/10.5281/zenodo.22050659).
-See `CITATION.cff` for complete citation metadata.
+See `CITATION.cff` for the original release metadata. Update its version, date,
+and DOI when the revised software archive is deposited.
 
 ## Acknowledgments
 
