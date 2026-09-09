@@ -254,7 +254,7 @@ def burgers_perturbation_response():
                 label='kernel-smoothed perturbation')
     ax.plot([float(response['measured_phi_rmse'])],
             [float(response['measured_u_l2'])], marker='*', color=DET,
-            ms=14, ls='none', label='measured particle pipeline')
+            ms=14, ls='none', label='GRW computation')
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_xlabel(r'perturbation amplitude on $\phi$ (RMS)')
