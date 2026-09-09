@@ -1,22 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate all six ensemble/control paper figures from pinned data.
-
-  heat_bias_spread_total_vs_N   from pinned_ensembles/heat_extended/summary_by_N.csv
-  fhn_convergence               from pinned_ensembles/fhn_extended/summary_by_N.csv
-  heat_grid_paired              from pinned_ensembles/heat_grid_paired/summary.json
-  burgers_decoupled             from pinned_ensembles/burgers_controls/summary.json
-  burgers_boundary_domain       from pinned_ensembles/burgers_controls/summary.json
-  burgers_perturbation_response from pinned_ensembles/burgers_controls/summary.json
-
-In the paper (arXiv:2608.22592) these are `fig:heat-bst`,
-`fig:fhn-convergence`, `fig:heat-grid-paired`, `fig:burgers-decoupled`,
-`fig:burgers-boundary-domain`, and `fig:burgers-perturbation-response`.
-
-Titleless, legends only, publication style matching regenerate_paper_figures.
-The study scripts also write diagnostic copies, but this script is the
-canonical paper-figure path. Output:
-output/final_prepublication_tests/paper_figures/
-"""
+"""Generate the six ensemble/control paper figures from committed data."""
 import csv
 import json
 import os

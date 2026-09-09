@@ -1,20 +1,4 @@
-"""Empirical-CDF identity checks for the paired heat study (manuscript `sec:analysis-cdf`,
-`sec:heat-grid-paired`).
-
-Evaluates, with no solver runs:
-  * the deterministic bin-and-sum control (bin-center and bin-edge floors),
-  * E[E_total^2] = pred^2 + h*sum F(1-F)/N and exact second moments of the spread and bias statistics,
-  * Gaussian/delta approximations to the sampling sd of the bias and spread, using Cov(F_N(x),F_N(y)) = [F(min)-F(x)F(y)]/N,
-  * the paired identity ||b_c||^2 - ||b_e||^2 = ||d||^2 + 2<b_e,d>,
-and compares them with pinned_ensembles/heat_grid_paired/summary_by_N_paired.csv.
-Run from the repository root:
-    python checks/heat_cdf_identity_check.py [--fresh]
-Optional --fresh reruns a direct numpy re-implementation of the heat walk for independent seed blocks
-(assesses seed-block variability of the spread; the pinned ensemble is not replaced).
-Square roots of exact second moments are RMS benchmarks, not exact expected norms.
-The squared-statistic variances use Gaussian quadratic-form approximations; standard
-deviations of norms then use a first-order delta approximation. No exact tail test is implied.
-"""
+"""Check the paired heat error identities and their finite-ensemble uncertainty scales."""
 import argparse, csv, sys
 from math import erf, sqrt
 from pathlib import Path

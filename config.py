@@ -350,27 +350,7 @@ def generate_fitzhugh_nagumo_initial_conditions(
 
 
 def generate_fhn_steady_ic(num_globs, a, x_center=0.0):
-    """
-    Steady-solution IC for the scalar FHN GRW.
-
-    Globs are initialized so that their cumulative sum reproduces the exact
-    traveling-wave profile u(x, 0) = 1 / (1 + exp(-(x - x_center) / 2))
-    at t = 0.
-
-    Initialization strategy:
-      - Divide the solution range [0, 1] into N0 equal segments.
-        u_i = (i + 0.5) / N0 for i = 0, ..., N0-1.
-      - Invert the logistic: x_i = x_center - 2 * log(1 / u_i - 1).
-      - Assign uniform weights w_i = 1 / N0.
-
-    This places all globs in sorted order with equal weights; the cumulative
-    sum reconstructs u from 0 at the left to 1 at the right.
-
-    :param num_globs: int, number of globs N0
-    :param a: float, FHN wave-speed parameter (used only for annotation)
-    :param x_center: float, position of the wave center (u = 0.5) at t = 0
-    :return: list of (position, weight) pairs
-    """
+    """Return equal-weight gradient particles at inverse-logistic positions for the scalar front."""
     N0 = int(num_globs)
     u_i = (np.arange(N0) + 0.5) / float(N0)
     x_i = x_center - 2.0 * np.log(1.0 / u_i - 1.0)
@@ -379,27 +359,7 @@ def generate_fhn_steady_ic(num_globs, a, x_center=0.0):
 
 
 def generate_fhn_nonsmooth_ic(num_globs, a, x_center=0.0, half_width=3.0):
-    """
-    Non-smooth IC for the scalar FHN GRW.
-
-    Globs are initialized to reproduce a piecewise-linear ramp profile:
-      u_0(x) = 0 for x < x_center - half_width
-      u_0(x) = (x - (x_center - hw)) / (2*hw) for |x - x_center| <= hw
-      u_0(x) = 1 for x > x_center + half_width
-
-    where hw = half_width. This is C0 but not C1: the gradient u_x has
-    jump discontinuities at the two kink points. The profile is expected
-    to relax toward the smooth logistic traveling wave over time.
-
-    Glob positions are placed via the linear inverse:
-      x_i = (x_center - hw) + 2 * hw * u_i
-
-    :param num_globs: int, number of globs
-    :param a: float, FHN wave-speed parameter (informational)
-    :param x_center: float, center of the ramp
-    :param half_width: float, half-width of the linear transition zone
-    :return: list of (position, weight) pairs
-    """
+    """Return equal-weight gradient particles representing a linear ramp of width twice half_width."""
     N0 = int(num_globs)
     hw = float(half_width)
     u_i = (np.arange(N0) + 0.5) / float(N0)
@@ -409,21 +369,7 @@ def generate_fhn_nonsmooth_ic(num_globs, a, x_center=0.0, half_width=3.0):
 
 
 def generate_fhn_discontinuous_ic(num_globs, a, x_center=0.0):
-    """
-    Discontinuous (Heaviside) IC for the scalar FHN GRW.
-
-    All N0 globs are placed at x = x_center with equal weights w_i = 1/N0.
-    This represents the Dirac delta u_x = delta(x - x_center), corresponding
-    to the step function u_0(x) = 0 for x < x_center, 1 for x >= x_center.
-
-    Over time the globs diffuse and develop the traveling-wave profile.
-    Even this extreme IC relaxes to the exact traveling wave solution.
-
-    :param num_globs: int, number of globs
-    :param a: float, FHN wave-speed parameter (informational)
-    :param x_center: float, initial position of all globs
-    :return: list of (position, weight) pairs
-    """
+    """Return equal-weight gradient particles at x_center representing a unit step."""
     N0 = int(num_globs)
     w_i = 1.0 / N0
     return [(float(x_center), w_i)] * N0

@@ -1,38 +1,8 @@
-"""Two-step heat profile: predicted error floors, transition particle counts,
-and a particle-count rule, tested against the solver (manuscript Section 5.4).
+"""Two-step heat predictions and ensemble validation (paper Section 5.4).
 
-Initial data u(x,0) = u_L + A H(x-a) + B H(x-b) on [0,L] with 0<a<b<L and
-A != B. N_a = N_b = N/2 globs are placed at a and b with weights A/N_a and
-B/N_b, evolved by the heat solver with weight-preserving reflection, and
-reconstructed by bin-and-sum on M bins.
-
-References
-  finite-interval  m(x,T) = u_L + A F_R(x,T;a) + B F_R(x,T;b), F_R the reflected CDF
-  infinite-line    u_inf(x,T) = u_L + A Phi(x;a) + B Phi(x;b), Phi the error-function CDF
-Comparison conventions: reference at bin right edges (aligned) or at bin centers.
-
-Predictions (independent globs, deterministic weights, fixed allocation fractions)
-  E[E_total^2]  = B_h^2 + V_h/N
-  E[E_bias^2]   = B_h^2 + V_h/(N S)
-  E[E_spread^2] = (S-1)/S * V_h/N
-  B_h^2 = h sum_j (m(b_j) - g_j)^2,   V_h = h sum_j [A^2/f_a F_a(1-F_a) + B^2/f_b F_b(1-F_b)](b_j)
-  N_* = V_h / B_h^2 (B_h > 0),   N >= V_h / (eps^2 - B_h^2) for a target RMS error eps > B_h.
-
-Usage (from the repository root):
-  python studies/study_t9_heat_two_step.py predict           # deterministic predictions only
-  python studies/study_t9_heat_two_step.py pilot             # time one N=50000 run
-  python studies/study_t9_heat_two_step.py run               # production ensembles (seeds 5000-5029)
-  python studies/study_t9_heat_two_step.py validate          # held-out target demonstration (seeds 7000-7029)
-Outputs go to output/heat_two_step/.
-Use --output-dir PATH to write a separate reproduction. The predict command
-also generates validation_spec.json before either ensemble is run.
-
-The cumulative construction and finite-interval reflection are classical
-(Ghoniem and Sherman, 1985, Sections II-III, DOI 10.1016/0021-9991(85)90058-0).
-The weighted Bernoulli variance is established mathematics; see also BPC
-(2024), Appendix A.2, DOI 10.1007/s10915-024-02614-1. This study applies it
-to the reported comparison points and tests the resulting predictions.
-"""
+Uses unequal particle weights with equal group allocation and a reflected
+finite-interval reference. The predict stage saves the design before the
+production and held-out validation stages."""
 import argparse
 import json
 import os

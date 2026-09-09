@@ -1,71 +1,16 @@
 #!/usr/bin/env python3
-"""
-reproduce.py — one command per artifact of the GRW accuracy paper
-(arXiv:2608.22592).
+"""Run the paper studies, comparisons, and figures.
 
-Wrapper-only entry point: this script calls the existing study and figure code
-with the exact configurations used in the paper. It does not modify, and
-must never modify, any solver or study code.
+Usage: python reproduce.py TARGET
+  paper                         Generate all eleven figures from committed data.
+  verify-all                    Rerun and compare all numerical studies.
+  verify [--deep]                Representative results (and particle arrays).
+  verify-ensembles [--no-rerun]  Original ensemble/control comparisons.
+  verify-two-step [--no-rerun|--pinned-only]  Two-step heat comparisons.
+  t3, t4, t5, t7, t8, t9        Individual studies (see README).
+  studies, ensembles, figures, all  Generate study data or representative figures.
 
-Targets
-    python reproduce.py studies   # single-seed representative study data
-                                  # (seed 42)
-    python reproduce.py figures   # representative-figure set from archived
-                                  # arrays (the paper's eleven figures come from
-                                  # the `paper` target)
-    python reproduce.py all       # studies + figures (representative layer)
-    python reproduce.py verify    # re-run studies, compare every reported value
-                                  # against expected_values.json (PASS/FAIL)
-    python reproduce.py verify --deep
-                                  # additionally re-run the three representative
-                                  # simulations (seed 42) and compare the arrays
-                                  # against figure_data/*.npz
-    python reproduce.py figures --rerun-arrays
-                                  # regenerate the archived arrays from fresh
-                                  # seed-42 simulations before plotting
-                                  # (overwrites figure_data/representative_figure_arrays.npz)
-    python reproduce.py ensembles # multi-seed ensemble, paired-grid, and
-                                  # Cole-Hopf control studies (t4 t7 t5 t3 t8)
-    python reproduce.py t9        # predict, run and verify the two-step heat extension
-    python reproduce.py verify-two-step [--no-rerun|--pinned-only]
-                                  # fresh comparison or archived design/moment checks
-    python reproduce.py t3|t4|t5|t7|t8
-                                  # one ensemble study (see verify_ensembles.py)
-    python reproduce.py verify-ensembles
-                                  # re-run all five ensemble studies and compare
-                                  # every pinned numeric field against
-                                  # pinned_ensembles/ (PASS/FAIL)
-    python reproduce.py verify-all
-                                  # release gate: verify --deep, then re-run and
-                                  # compare all five ensemble studies. PASS only
-                                  # if all groups pass, including the two-step extension.
-    python reproduce.py paper     # regenerate the eleven combined-paper figures
-    python reproduce.py paper1-figures
-                                  # compatibility alias for ``paper``; writes to
-                                  # output/final_prepublication_tests/paper_figures/
-                                  # with a SHA-256 provenance manifest
-
-Standalone checks that are not targets of this script live in checks/
-(see README, Additional Checks).
-
-All paper configurations are pinned inside study_paper_refinement.py,
-figure_scripts/regenerate_paper_figures.py (seed 42 throughout), and the
-studies/ scripts (fixed seed lists documented in each study). The JSON
-configs under configs/ and main.py are interactive exploration tools; they
-are not the source of the paper's numbers.
-
-Numerical tolerances
-    The representative checks use rel/abs float tolerance 1e-12. Under the pinned
-    environment in requirements.txt the regeneration is bit-identical; under
-    other NumPy/BLAS builds, last-digit floating-point noise up to about
-    2.4e-14 relative has been observed. The 1e-12 tolerance sits well above
-    that platform noise and many orders of magnitude below the precision at
-    which any value is reported in the paper. Differences at that precision
-    therefore fail these representative checks.
-    The ensemble and two-step comparators use rel 1e-9 / abs 1e-12,
-    as specified in their modules. Integers, row counts, seeds, and identifiers
-    are always compared exactly.
-"""
+The README lists the three separate analytical/bootstrap controls."""
 
 from __future__ import annotations
 
@@ -339,7 +284,6 @@ def main() -> int:
         import verify_ensembles
         return verify_ensembles.verify(rerun="--no-rerun" not in args)
     if target in {"paper", "paper1-figures"}:
-        import hashlib
         import shutil
         import tempfile
 
@@ -349,9 +293,7 @@ def main() -> int:
             shutil.rmtree(paper_dir)
         paper_dir.mkdir(parents=True, exist_ok=True)
 
-        # The representative generator normally writes to a timestamped
-        # exploration directory. Give it a private temporary destination here
-        # so this target never guesses which prior run is the newest.
+        # Collect the representative figures from this run.
         with tempfile.TemporaryDirectory(prefix="paper1_figures_") as tmp:
             representative_dir = Path(tmp)
             subprocess.run(
@@ -365,8 +307,7 @@ def main() -> int:
                          "fhn_diagnostics.pdf", "burgers_diagnostics.pdf"):
                 shutil.copy2(representative_dir / name, paper_dir / name)
 
-        # The six ensemble/control figures are always redrawn from committed
-        # pinned data. A clean checkout therefore needs no prior study output.
+        # Draw ensemble/control figures from committed data.
         subprocess.run([sys.executable,
                         str(ROOT / "figure_scripts" / "regenerate_ensemble_figures.py")],
                        cwd=ROOT, check=True)
@@ -377,38 +318,24 @@ def main() -> int:
                         "--data-dir", str(ROOT / "pinned_ensembles/heat_two_step"),
                         "--output-dir", str(paper_dir)], cwd=ROOT, check=True)
 
-        wanted = {
-            "Figure_11.pdf": "pinned_ensembles/heat_two_step/{predictions,ensembles,validation}.json",
-            "heat_comparison.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",
-            "fhn_comparison.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",
-            "fhn_diagnostics.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",
-            "burgers_diagnostics.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",
-            "heat_bias_spread_total_vs_N.pdf": "pinned_ensembles/heat_extended/summary_by_N.csv",
-            "fhn_convergence.pdf": "pinned_ensembles/fhn_extended/summary_by_N.csv",
-            "heat_grid_paired.pdf": "pinned_ensembles/heat_grid_paired/summary.json",
-            "burgers_decoupled.pdf": "pinned_ensembles/burgers_controls/summary.json",
-            "burgers_boundary_domain.pdf": "pinned_ensembles/burgers_controls/summary.json",
-            "burgers_perturbation_response.pdf": "pinned_ensembles/burgers_controls/summary.json",
-        }
-        manifest = {}
-        for name, source in wanted.items():
-            path = paper_dir / name
-            if path.exists():
-                digest = hashlib.sha256(path.read_bytes()).hexdigest()
-                manifest[name] = {
-                    "source": source,
-                    "sha256": digest,
-                    "bytes": path.stat().st_size,
-                }
-            else:
-                manifest[name] = {"source": source, "sha256": None,
-                                  "error": "not generated"}
-        with (paper_dir / "paper1_figure_manifest.json").open("w") as stream:
-            json.dump(manifest, stream, indent=2)
-        missing = [k for k, v in manifest.items() if v["sha256"] is None]
-        print(f"\npaper: {len(manifest) - len(missing)}/{len(manifest)} "
-              f"canonical figures in {paper_dir.relative_to(ROOT)}/ "
-              f"(manifest: paper1_figure_manifest.json)")
+        wanted = (
+            'Figure_11.pdf',
+            'heat_comparison.pdf',
+            'fhn_comparison.pdf',
+            'fhn_diagnostics.pdf',
+            'burgers_diagnostics.pdf',
+            'heat_bias_spread_total_vs_N.pdf',
+            'fhn_convergence.pdf',
+            'heat_grid_paired.pdf',
+            'burgers_decoupled.pdf',
+            'burgers_boundary_domain.pdf',
+            'burgers_perturbation_response.pdf',
+        )
+        missing = [name for name in wanted if not (paper_dir / name).is_file()]
+        print(f"\npaper: {len(wanted) - len(missing)}/{len(wanted)} "
+              f"figures in {paper_dir.relative_to(ROOT)}/")
+        if missing:
+            print("Missing: " + ", ".join(missing))
         return 1 if missing else 0
     if target == "studies":
         elapsed = run_studies()

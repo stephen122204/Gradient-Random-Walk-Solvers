@@ -1,47 +1,4 @@
-"""Paired heat output-grid study with aligned-evaluation correction and a
-deterministic operator control (manuscript `sec:heat-grid-paired`,
-`tab:heat-grid-paired`, `fig:heat-grid-paired`, arXiv:2608.22592; reproduce
-target: t7).
-
-Same physical and numerical parameters, particle counts, and 30 seeds as the
-heat ensemble study (t4): alpha=0.5, domain [0,4], x0=2, increasing unit step,
-T=0.5, dt=0.005, N in {500,...,50000}, seeds 42..71.
-
-For each (N, seed) ONE simulation is run; the identical final particle set is
-then reconstructed under five output-grid treatments:
-
-  coupled   : sorted cumulative sum interpolated to a uniform N-point grid
-              (exactly the t4 ensemble treatment; the coupled rows and the
-              rng(303) fitted slopes/CIs reproduce t4's published values
-              digit-for-digit)
-  fixed300  : weights binned on a fixed 300-bin grid, cumulative sum, compared
-              with the exact profile at bin CENTERS (the bin-center comparison
-              convention analyzed in the manuscript)
-  fixed400  : the same with 400 bins
-  fixed300e : the same 300-bin reconstruction compared with the exact profile
-              at bin RIGHT EDGES (the aligned-evaluation correction: the
-              cumulative sum over bins 0..k is the reconstruction at the right
-              edge of bin k, so that is where the reference is evaluated)
-  fixed400e : the same with 400 bins
-
-The center-compare and edge-compare treatments share the identical reconstruction
-vector, so their stochastic spreads agree; only the deterministic comparison
-convention differs.
-
-Deterministic operator control (no particles): the exact reflected position
-law on [0,4] (method of images) is passed through the same bin-and-sum
-operator and compared under both conventions. This predicts the fixed-grid
-bias floor of the diagnosed convention (0.00435 / 0.00334 at 300/400 bins)
-and the grid-independent finite-domain residual of the aligned convention
-(0.00109), with no stochastic input.
-
-Uncertainty: realization-level bootstrap confidence intervals for the fitted
-total/spread/bias slopes of every treatment, obtained by resampling the 30
-realizations within each particle count (Gram-matrix formulation, n_boot
-5000, rng seed 12345, matching the FHN study's procedure).
-
-Output: output/final_prepublication_tests/heat_grid_paired/
-"""
+"""Paired heat reconstructions at bin centers and edges with deterministic reference controls."""
 import csv
 import json
 import os

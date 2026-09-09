@@ -1,11 +1,4 @@
-"""Interactive entry point: run one JSON config through the matching GRW
-solver and plot the result.
-
-Exploration tool only — the paper's numbers and figures come from reproduce.py
-and the pinned studies (see README.md). Usage:
-
-    python main.py configs/heat_step_dirichlet.json
-"""
+"""Run a JSON configuration through the matching solver and plot the result."""
 import sys
 import config as config_module
 from utils import plot_results
