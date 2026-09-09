@@ -7,8 +7,10 @@ computed from the exact covariance of the reconstruction, so that agreement is
 assessed against the scatter expected at S realizations rather than against zero.
 
 Run from the repository root after study_t9_heat_two_step.py run (and validate).
+Use --data-dir pinned_ensembles/heat_two_step to analyze committed results
+without running particles, and --output-dir PATH to select the figure destination.
 """
-import json, os, sys
+import argparse, json, os, sys
 from math import sqrt
 import numpy as np
 import matplotlib; matplotlib.use('Agg')
@@ -23,7 +25,13 @@ from study_t9_heat_two_step import (grid, covariance, m_finite, u_inf,  # noqa: 
 apply_paper_style()
 
 OUT = os.path.join(ROOT, 'output', 'heat_two_step')
-pred = json.load(open(f'{OUT}/predictions.json')); ens = json.load(open(f'{OUT}/ensembles.json'))
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--data-dir', default=OUT)
+parser.add_argument('--output-dir', default=OUT)
+args = parser.parse_args()
+DATA, OUT = os.path.abspath(args.data_dir), os.path.abspath(args.output_dir)
+os.makedirs(OUT, exist_ok=True)
+pred = json.load(open(f'{DATA}/predictions.json')); ens = json.load(open(f'{DATA}/ensembles.json'))
 pM = {p['M']: p for p in pred['per_M']}
 rows = ens['rows']; S = rows[0]['S']
 REF = {'finite': m_finite, 'infinite': u_inf}
@@ -100,8 +108,8 @@ l1 += ['bin centers', 'bin edges']
 axes[0].legend(h1, l1, fontsize=7, ncol=2)
 fig.tight_layout(); fig.savefig(f'{OUT}/Figure_11.pdf'); print("\nFigure_11.pdf written")
 
-if os.path.exists(f'{OUT}/validation.json'):
-    val = json.load(open(f'{OUT}/validation.json')); spec = val['spec']; M = spec['M']; N = spec['N']
+if os.path.exists(f'{DATA}/validation.json'):
+    val = json.load(open(f'{DATA}/validation.json')); spec = val['spec']; M = spec['M']; N = spec['N']
     print(f"\n=== held-out accuracy target: RMS error {spec['target_rms_error']} against the infinite-line reference")
     print(f"model rules out the bin-center convention before running: floor {spec['center_convention']['B']:.5f} exceeds the target")
     for r in val['rows']:

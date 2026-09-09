@@ -24,9 +24,17 @@ Usage (from the repository root):
   python studies/study_t9_heat_two_step.py run               # production ensembles (seeds 5000-5029)
   python studies/study_t9_heat_two_step.py validate          # held-out target demonstration (seeds 7000-7029)
 Outputs go to output/heat_two_step/.
+Use --output-dir PATH to write a separate reproduction. The predict command
+also generates validation_spec.json before either ensemble is run.
+
+The cumulative construction and finite-interval reflection are classical
+(Ghoniem and Sherman, 1985, Sections II-III, DOI 10.1016/0021-9991(85)90058-0).
+The weighted Bernoulli variance is established mathematics; see also BPC
+(2024), Appendix A.2, DOI 10.1007/s10915-024-02614-1. This study applies it
+to the reported comparison points and tests the resulting predictions.
 """
-import json, os, sys, time
-from math import erf, sqrt
+import argparse, json, os, sys, time
+from math import ceil, erf, sqrt
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -89,7 +97,7 @@ def covariance(M, N):
 
     Independent groups add, and within a group the indicators satisfy
     I(x)I(y) = I(min(x,y)), so for group weight w and count n the covariance is
-    w^2 n [F(min) - F(x)F(y)] / n^2. The factor h converts to the L_h^2 inner product.
+    w^2 n [F(min) - F(x)F(y)]. The factor h converts to the L_h^2 inner product.
     """
     edges, be, ce, h = grid(M)
     Na = Nb = N // 2
@@ -106,6 +114,31 @@ def image_truncation_check():
     d = max(np.max(np.abs(F_R(x, XA, 4) - F_R(x, XA, 8))), np.max(np.abs(F_R(x, XB, 4) - F_R(x, XB, 8))))
     return {'max_abs_diff_4_vs_8_images': float(d),
             'F_R(L;a)-1': float(F_R(L, XA) - 1), 'F_R(L;b)-1': float(F_R(L, XB) - 1)}
+
+
+def validation_spec():
+    """Recompute the paper's fixed target design without running particles.
+
+    Round the bound upward to an even count to preserve the half/half allocation.
+    This reproduces the historical design; it is not a new prospective experiment.
+    """
+    M, target = 200, 0.008
+    p = predictions(M)
+    edge, center = p['infinite_edge'], p['infinite_center']
+    if target <= edge['B']:
+        raise ValueError('The edge floor must be below the fixed validation target')
+    N = 2 * ceil(p['V_h'] / (target**2 - edge['B2']) / 2)
+    return {
+        'purpose': 'held-out accuracy-target demonstration, specified before any validation run',
+        'reference': 'infinite-line (the reference a user would normally have)',
+        'M': M, 'target_rms_error': target,
+        'center_convention': {'B': center['B'], 'attainable': target > center['B']},
+        'edge_convention': {'B': edge['B'], 'attainable': True, 'N_required': N,
+                            'predicted_E_total_at_N': sqrt(edge['B2'] + p['V_h']/N)},
+        'predicted_E_total_center_at_same_N': sqrt(center['B2'] + p['V_h']/N),
+        'N': N, 'seeds': f'{SEEDS_VAL[0]}-{SEEDS_VAL[-1]}',
+        'criterion': 'measured RMS realization error (E_total) against the infinite-line reference at the bin edges compared with eps and with the predicted value; center convention reported at the same N',
+    }
 
 # ---- solver path --------------------------------------------------------------
 def run_one(N, seed):
@@ -153,7 +186,11 @@ def ensemble(N, seeds):
     return rows, runtimes
 
 if __name__ == '__main__':
-    mode = sys.argv[1] if len(sys.argv) > 1 else 'predict'
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('mode', nargs='?', default='predict', choices=['predict', 'pilot', 'run', 'validate'])
+    parser.add_argument('--output-dir', default=OUT)
+    args = parser.parse_args()
+    mode, OUT = args.mode, os.path.abspath(args.output_dir)
     os.makedirs(OUT, exist_ok=True)
     if mode == 'predict':
         pred = {'design': dict(alpha=ALPHA, L=L, T=T, dt=DT, u_L=UL, A=A, B=B, a=XA, b=XB, f_a=FA, f_b=FB,
@@ -162,6 +199,7 @@ if __name__ == '__main__':
                 'image_truncation': image_truncation_check(),
                 'per_M': [predictions(M) for M in M_LIST]}
         json.dump(pred, open(os.path.join(OUT, 'predictions.json'), 'w'), indent=1)
+        json.dump(validation_spec(), open(os.path.join(OUT, 'validation_spec.json'), 'w'), indent=1)
         for p in pred['per_M']:
             print(f"M={p['M']:4d} h={p['h']:.4f} V_h={p['V_h']:.4e} | "
                   f"B(fin,center)={p['finite_center']['B']:.3e} N*={p['finite_center']['N_star']:.0f} | "
