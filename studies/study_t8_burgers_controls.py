@@ -603,7 +603,7 @@ def make_figures(decoupled_rows, boundary_rows, pert, domain_rows):
                 label='kernel-smoothed perturbation')
     ax.plot([pert['measured_phi_rmse']], [pert['measured_u_l2']],
             marker='*', color='tab:red', ms=14, ls='none',
-            label='measured particle pipeline')
+            label='GRW computation')
     ax.set_xscale('log'); ax.set_yscale('log')
     ax.set_xlabel(r'perturbation amplitude on $\phi$ (RMS)')
     ax.set_ylabel(r'$L^2$ error of recovered $u$')
