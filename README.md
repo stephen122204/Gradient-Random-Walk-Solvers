@@ -39,10 +39,10 @@ python checks/bootstrap_seed_grouping_check.py --heat-profiles --json output/boo
 ```
 
 The bootstrap output’s `joint` intervals are those used in the manuscript.
-Results go under `output/`; the eleven figures are in
+Results go under `output/`. The eleven figures are in
 `output/final_prepublication_tests/paper_figures/`. Rerunning replaces generated
 outputs. Allow several minutes for the studies and several GB of available
-memory for the direct-distribution control; runtime depends on hardware.
+memory for the direct-distribution control. Runtime depends on hardware.
 
 ## Use your own inputs
 
@@ -56,6 +56,6 @@ python main.py configs/my_heat.json
 
 Reaction–diffusion and Burgers examples are `fhn_grw_steady.json` and
 `burgers_stationary_shock.json` in `configs/`. Fields are described in
-`config_template.jsonc`. Plots go under `outputs/`; save your edited input
+`config_template.jsonc`. Plots go under `outputs/`. Save your edited input
 alongside them. For a sweep or ensemble, adapt the relevant script in
 `studies/`, including its parameters, seed list, and output directory.
