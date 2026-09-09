@@ -18,8 +18,10 @@ git clone --branch grw-solvers-v3 https://github.com/stephen122204/Gradient-Rand
 cd Gradient-Random-Walk-Solvers
 ```
 
-Alternatively, extract the code supplement ZIP and open a terminal in its
-`source/` folder.
+For the archived version 1.1.0, download the ZIP from
+[Zenodo](https://doi.org/10.5281/zenodo.22680376), extract it, and open a
+terminal in `Gradient-Random-Walk-Solvers-1.1.0/`. If using the journal
+code supplement ZIP, open its `source/` folder instead.
 
 Create a Python 3.11 environment:
 
@@ -133,10 +135,10 @@ parameters, seed lists, and output directories for new studies.
 
 ## Citation
 
-The original version 1.0.0 is archived on
-[Zenodo](https://doi.org/10.5281/zenodo.22050659).
-This branch also includes the added two-step heat study and updated checks.
-See `CITATION.cff` for citation metadata.
+Version 1.1.0, including the two-step heat study and updated checks, is
+archived on [Zenodo](https://doi.org/10.5281/zenodo.22680376). Cite this
+version when reproducing the revised paper. See `CITATION.cff` for author
+and paper citation metadata.
 
 ## Acknowledgments
 
