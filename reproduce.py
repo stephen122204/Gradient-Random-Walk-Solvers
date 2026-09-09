@@ -11,7 +11,7 @@ Targets
     python reproduce.py studies   # single-seed representative study data
                                   # (seed 42)
     python reproduce.py figures   # representative-figure set from archived
-                                  # arrays (the paper's ten figures come from
+                                  # arrays (the paper's eleven figures come from
                                   # the `paper` target)
     python reproduce.py all       # studies + figures (representative layer)
     python reproduce.py verify    # re-run studies, compare every reported value
@@ -26,6 +26,9 @@ Targets
                                   # (overwrites figure_data/representative_figure_arrays.npz)
     python reproduce.py ensembles # multi-seed ensemble, paired-grid, and
                                   # Cole-Hopf control studies (t4 t7 t5 t3 t8)
+    python reproduce.py t9        # predict, run and verify the two-step heat extension
+    python reproduce.py verify-two-step [--no-rerun|--pinned-only]
+                                  # fresh comparison or archived design/moment checks
     python reproduce.py t3|t4|t5|t7|t8
                                   # one ensemble study (see verify_ensembles.py)
     python reproduce.py verify-ensembles
@@ -35,8 +38,8 @@ Targets
     python reproduce.py verify-all
                                   # release gate: verify --deep, then re-run and
                                   # compare all five ensemble studies. PASS only
-                                  # if both groups pass.
-    python reproduce.py paper     # regenerate the ten combined-paper figures
+                                  # if all groups pass, including the two-step extension.
+    python reproduce.py paper     # regenerate the eleven combined-paper figures
     python reproduce.py paper1-figures
                                   # compatibility alias for ``paper``; writes to
                                   # output/final_prepublication_tests/paper_figures/
@@ -300,19 +303,26 @@ def main() -> int:
     args = sys.argv[1:]
     known = {"studies", "figures", "all", "verify", "ensembles",
              "verify-ensembles", "verify-all", "paper", "paper1-figures",
-             "t3", "t4", "t5", "t7", "t8"}
+             "t3", "t4", "t5", "t7", "t8", "t9", "verify-two-step"}
     if not args or args[0] not in known:
         print(__doc__)
         return 2
     target = args[0]
+    if target in {"t9", "verify-two-step"}:
+        from checks.verify_two_step import verify as verify_two_step
+        return verify_two_step(rerun="--no-rerun" not in args,
+                               pinned_only="--pinned-only" in args)
     if target == "verify-all":
         deep_rc = verify(deep=True)
         import verify_ensembles
         ens_rc = verify_ensembles.verify(rerun=True)
-        ok = deep_rc == 0 and ens_rc == 0
+        from checks.verify_two_step import verify as verify_two_step
+        two_step_rc = verify_two_step()
+        ok = deep_rc == 0 and ens_rc == 0 and two_step_rc == 0
         print(f"\nVERIFY-ALL: {'PASS' if ok else 'FAIL'} — deep representative "
               f"checks {'passed' if deep_rc == 0 else 'FAILED'}, ensemble "
-              f"comparisons {'passed' if ens_rc == 0 else 'FAILED'}.")
+              f"comparisons {'passed' if ens_rc == 0 else 'FAILED'}, two-step "
+              f"extension {'passed' if two_step_rc == 0 else 'FAILED'}.")
         return 0 if ok else 1
     if target in {"t3", "t4", "t5", "t7", "t8"}:
         import verify_ensembles
@@ -359,7 +369,14 @@ def main() -> int:
                         str(ROOT / "figure_scripts" / "regenerate_ensemble_figures.py")],
                        cwd=ROOT, check=True)
 
+        # Reproduce the added heat prediction figure from committed data too.
+        subprocess.run([sys.executable,
+                        str(ROOT / "studies/analyze_t9_heat_two_step.py"),
+                        "--data-dir", str(ROOT / "pinned_ensembles/heat_two_step"),
+                        "--output-dir", str(paper_dir)], cwd=ROOT, check=True)
+
         wanted = {
+            "Figure_11.pdf": "pinned_ensembles/heat_two_step/{predictions,ensembles,validation}.json",
             "heat_comparison.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",
             "fhn_comparison.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",
             "fhn_diagnostics.pdf": "figure_data/representative_figure_arrays.npz (seed 42)",

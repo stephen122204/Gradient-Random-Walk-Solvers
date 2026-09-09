@@ -1,10 +1,12 @@
 """Sensitivity of the fitted-trend confidence intervals to how seeds are resampled.
 
 Every ensemble study reuses the same seed list at each parameter value. The
-reported realization-level bootstrap resamples the S realizations independently
-within each parameter value. This check recomputes those intervals and compares
-them with intervals obtained by resampling the seed labels jointly across all
-parameter values, which preserves any dependence created by the shared seeds.
+earlier realization-level bootstrap resampled independently within each parameter
+value. The revised manuscript uses joint-by-seed intervals as primary. This
+check reports both schemes. Its REPORTED references preserve the earlier
+independent intervals for regression checking; JSON joint fields supply the
+current manuscript intervals. Joint resampling preserves seed grouping across
+all parameter values.
 
 Coverage
   from pinned per-realization norms (no solver runs):
