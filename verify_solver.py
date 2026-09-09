@@ -62,55 +62,12 @@ def exact_heat_step(x, T, x0, uL, uR, alpha):
 
 
 def exact_burgers_traveling_wave(x, t, nu, x_center=0.0):
-    """
-    Exact traveling wave solution for Burgers' equation u_t + u*u_x = nu*u_xx.
-
-    u(x, t) = 1 - 2*sqrt(nu) * tanh((x - x_center - t) / sqrt(nu))
-
-    This is the exact infinite-domain solution for the IC
-      u0(x) = 1 - 2*sqrt(nu) * tanh((x - x_center) / sqrt(nu)).
-    The wave moves at unit speed c = 1.
-
-    Derivation: inserting the ansatz f(x - ct) into Burgers' equation yields
-    c = 1 (wave speed = mean value) and delta = sqrt(nu) (wave width).
-    The solution is valid on an infinite domain; on a finite domain it is an
-    approximation that degrades near the boundaries as the wave approaches them.
-
-    :param x: array of spatial positions
-    :param t: final time
-    :param nu: kinematic viscosity
-    :param x_center: initial wave center position
-    :return: array of exact u values at (x, t)
-    """
+    """Exact infinite-line Burgers wave traveling at unit speed."""
     return 1.0 - 2.0 * np.sqrt(nu) * np.tanh((x - x_center - t) / np.sqrt(nu))
 
 
 def exact_burgers_stationary_shock(x, nu, x_center=None, amplitude=1.0):
-    """
-    Exact stationary-shock solution for Burgers' equation u_t + u*u_x = nu*u_xx.
-
-    u(x, t) = -A * tanh(A * (x - x_center) / (2 * nu)) for all t >= 0
-
-    where A = amplitude. This is an exact STATIONARY solution: the nonlinear
-    advection term u*u_x and the diffusion term nu*u_xx cancel exactly for any
-    amplitude A and viscosity nu. Verification:
-
-      u_x = -A^2 / (2*nu) * sech^2(A*(x-xc)/(2*nu))
-      u*u_x = A^3 * tanh(...) * sech^2(...) / (2*nu)
-      u_xx = A^3 * tanh(...) * sech^2(...) / (2*nu^2)
-      nu*u_xx = A^3 * tanh(...) * sech^2(...) / (2*nu) = u*u_x QED
-
-    The Cole-Hopf phi0 for this IC satisfies phi0(0) = phi0(L) whenever xc = L/2
-    and the domain is symmetric about xc, making the cumulative reconstruction in
-    the GRW return exactly to its starting value -- a well-conditioned property for
-    the Cole-Hopf GRW test problem.
-
-    :param x: array of spatial positions
-    :param nu: kinematic viscosity
-    :param x_center: shock centre; if None, defaults to domain midpoint
-    :param amplitude: shock amplitude A (controls both wave height and width)
-    :return: array of exact u values (independent of time t)
-    """
+    """Exact stationary Burgers shock; the default center is the grid midpoint."""
     if x_center is None:
         x_center = 0.5 * (float(x.max()) + float(x.min()))
     return -amplitude * np.tanh(amplitude * (x - x_center) / (2.0 * nu))
