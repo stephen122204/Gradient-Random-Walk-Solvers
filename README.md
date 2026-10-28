@@ -135,10 +135,25 @@ parameters, seed lists, and output directories for new studies.
 
 ## Citation
 
-Version 1.1.0, including the two-step heat study and updated checks, is
-archived on [Zenodo](https://doi.org/10.5281/zenodo.22680376). Cite this
-version when reproducing the revised paper. See `CITATION.cff` for author
-and paper citation metadata.
+Preprint: https://arxiv.org/abs/2608.22592
+
+```bibtex
+@misc{abkin2026error,
+  title         = {Error attribution in gradient random walk methods for parabolic equations},
+  author        = {Abkin, Stephen and Daripa, Prabir},
+  year          = {2026},
+  eprint        = {2608.22592},
+  archivePrefix = {arXiv},
+  primaryClass  = {math.NA},
+  doi           = {10.48550/arXiv.2608.22592},
+  url           = {https://arxiv.org/abs/2608.22592}
+}
+```
+
+Version 1.1.0 of the software, including the two-step heat study and updated
+checks, is archived on [Zenodo](https://doi.org/10.5281/zenodo.22680376). Cite
+this version when reproducing the paper. See `CITATION.cff` for the software
+citation metadata.
 
 ## Acknowledgments
 
