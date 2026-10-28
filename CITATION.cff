@@ -16,7 +16,7 @@ repository-code: "https://github.com/stephen122204/Gradient-Random-Walk-Solvers"
 license: MIT
 preferred-citation:
   type: article
-  title: "On the Accuracy of Gradient Random Walk Methods for the Heat, FitzHugh–Nagumo, and Burgers' Equations"
+  title: "Error attribution in gradient random walk methods for parabolic equations"
   authors:
     - family-names: Abkin
       given-names: Stephen
